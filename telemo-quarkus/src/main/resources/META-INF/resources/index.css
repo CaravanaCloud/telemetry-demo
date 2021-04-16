@@ -1,0 +1,14 @@
+body {
+    background: black;
+}
+
+.center {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
+#content {
+    border: 3px solid darkgrey;
+    background: lightgray;
+}
