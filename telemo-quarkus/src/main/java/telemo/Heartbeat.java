@@ -14,6 +14,13 @@ public class Heartbeat implements Serializable {
     BigDecimal lng;
     LocalDateTime createTime;
     LocalDateTime acceptTime;
+    String displayColor;
+    Integer batteryLevel;
+
+    @Override
+    public String toString() {
+        return JSON.stringify(this);
+    }
 
     public String getSourceUUID() {
         return sourceUUID;
@@ -30,9 +37,6 @@ public class Heartbeat implements Serializable {
     public BigDecimal getLng() {
         return lng;
     }
-
-    String displayColor;
-    Integer batteryLevel;
 
     public LocalDateTime getCreateTime() {
         return createTime;

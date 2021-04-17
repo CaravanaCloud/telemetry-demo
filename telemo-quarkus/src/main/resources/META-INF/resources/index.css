@@ -2,6 +2,8 @@ body {
     background: black;
 }
 
+.leaflet-fade-anim .leaflet-tile,.leaflet-zoom-anim .leaflet-zoom-animated { will-change:auto !important; }
+
 .center {
     margin: auto;
     width: 50%;
@@ -11,4 +13,8 @@ body {
 #content {
     border: 3px solid darkgrey;
     background: lightgray;
+}
+
+#mapid {
+    height: 100vh;
 }
