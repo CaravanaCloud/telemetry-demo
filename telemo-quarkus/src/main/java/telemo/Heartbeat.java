@@ -17,7 +17,7 @@ public class Heartbeat implements Serializable {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(columnDefinition = "CHAR(32)")
+    @Column(columnDefinition = "CHAR(36)")
     String uuid;
     String sourceUUID;
     String sourceIP;

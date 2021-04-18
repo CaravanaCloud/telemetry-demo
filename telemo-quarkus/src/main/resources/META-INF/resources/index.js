@@ -1,6 +1,6 @@
 console.log("Welcome to Telemetry Demo!")
 
-const decay_interval = 60000;
+const decay_interval = 10 * 1000;
 const palette = [
   "#f94144",
   "#f3722c",
@@ -32,8 +32,9 @@ function decrementBattery(){
 }
 
 function changeColor(){
+  c_fill = randomColor();
   circle.setStyle({
-    fillColor: randomColor()
+    fillColor: c_fill
   });
 }
 
@@ -123,7 +124,7 @@ function sendTelemetry(){
     "lat": lat,
     "lng": lng,
     "createTime": new Date().toISOString(),
-    "displayColor": c_color,
+    "displayColor": c_fill,
     "batteryLevel": batteryLevel}
   xmlHttp.send(JSON.stringify(state));
 }
