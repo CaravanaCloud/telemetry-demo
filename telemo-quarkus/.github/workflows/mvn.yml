@@ -1,0 +1,68 @@
+name: Maven-Build
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: DeLaGuardo/setup-graalvm@4.0
+        with:
+          graalvm: '21.0.0.2'
+          java: 'java11'
+          arch: 'amd64'
+      - run: java -version
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build with Maven
+        run: mvn --batch-mode --update-snapshots verify
+        env:
+          MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
+
+      - name: Generate JaCoCo Badge
+        id: jacoco
+        uses: cicirello/jacoco-badge-generator@v2.0.1
+        if: hashFiles('./target/jacoco-report/jacoco.csv') != ''
+        with:
+          jacoco-csv-file: ./target/jacoco-report/jacoco.csv
+      - name: Copy jacoco reports
+        run: |
+          echo aws s3 sync ./target/jacoco-report/ s3://anonymouse.caravana.cloud/jacoco/
+      - name: Copy jacoco badge
+        run: |
+          echo aws s3 sync ./.github/badges/ s3://anonymouse.caravana.cloud/badges/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - run: aws sts get-caller-identity
+
+#      - name: Generate API EB package
+#        run: zip -j ./target/eb.zip ./target/tdc-api-1.0.0-SNAPSHOT-runner.jar ./src/main/eb/Procfile
+#        working-directory: tdc-api
+#      - name: Deploy API to EB
+#        uses: einaregilsson/beanstalk-deploy@v16
+#        with:
+#          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          application_name: tdc-poc-api
+#          environment_name: tdc-poc-api-env
+#          version_label: tdc-api_${{ github.SHA }}
+#          region: us-west-2
+#          deployment_package: ./tdc-api/target/eb.zip
+#          wait_for_deployment: false
+#      - uses: actions/upload-artifact@v2
+#        with:
+#          name: tdc-api-eb.zip
+#          path: ./tdc-api/target/eb.zip
