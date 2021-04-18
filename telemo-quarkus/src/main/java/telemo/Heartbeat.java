@@ -4,10 +4,21 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import org.hibernate.annotations.GenericGenerator;
 
+@Entity
 public class Heartbeat implements Serializable {
     static final String serverUUID = UUID.randomUUID().toString();
 
+    @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(columnDefinition = "CHAR(32)")
+    String uuid;
     String sourceUUID;
     String sourceIP;
     BigDecimal lat;
@@ -20,6 +31,10 @@ public class Heartbeat implements Serializable {
     @Override
     public String toString() {
         return JSON.stringify(this);
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public String getSourceUUID() {
@@ -60,6 +75,7 @@ public class Heartbeat implements Serializable {
 
     public static Heartbeat of() {
         return new Heartbeat(){{
+            uuid = UUID.randomUUID().toString();
             sourceUUID = serverUUID;
             lat = BigDecimal.ZERO;
             lng = BigDecimal.ZERO;
