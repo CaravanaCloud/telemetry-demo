@@ -8,14 +8,12 @@ import static org.hamcrest.CoreMatchers.is;
 
 @QuarkusTest
 public class HeartbeatResourceTest {
-
     @Test
     public void testHelloEndpoint() {
         given()
-          .when().get("/hb")
+          .when().get("/api/hb")
           .then()
-             .statusCode(200)
-             .body(is("Hello RESTEasy"));
+             .statusCode(200);
     }
 
 }
