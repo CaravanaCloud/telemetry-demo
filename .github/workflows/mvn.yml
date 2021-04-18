@@ -22,23 +22,11 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Build with Maven
+      - name: Build Quarkus Module [Verify]
         run: mvn --batch-mode --update-snapshots verify
+        working-directory: telemo-quarkus
         env:
           MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
-
-      - name: Generate JaCoCo Badge
-        id: jacoco
-        uses: cicirello/jacoco-badge-generator@v2.0.1
-        if: hashFiles('./target/jacoco-report/jacoco.csv') != ''
-        with:
-          jacoco-csv-file: ./target/jacoco-report/jacoco.csv
-      - name: Copy jacoco reports
-        run: |
-          echo aws s3 sync ./target/jacoco-report/ s3://anonymouse.caravana.cloud/jacoco/
-      - name: Copy jacoco badge
-        run: |
-          echo aws s3 sync ./.github/badges/ s3://anonymouse.caravana.cloud/badges/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -46,7 +34,8 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-      - run: aws sts get-caller-identity
+      - name: Check AWS authentication
+        run: aws sts get-caller-identity
 
 #      - name: Generate API EB package
 #        run: zip -j ./target/eb.zip ./target/tdc-api-1.0.0-SNAPSHOT-runner.jar ./src/main/eb/Procfile
