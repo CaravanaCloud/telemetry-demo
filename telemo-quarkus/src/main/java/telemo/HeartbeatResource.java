@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -72,12 +73,15 @@ public class HeartbeatResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @Transactional
-    public void put(Heartbeat hb,
+    public Heartbeat put(Heartbeat hb,
                     @Context HttpRequest req) {
+        hb.uuid = UUID.randomUUID().toString();
         hb.acceptTime = LocalDateTime.now();
         hb.sourceIP = req.getRemoteAddress();
-        heartbeatSvc.persist(hb);
-        log.fine(hb.toString());
+        Heartbeat merge = heartbeatSvc.merge(hb);
+        log.fine(merge.toString());
+        return merge;
+
     }
 
     private List<Heartbeat> findAll() {

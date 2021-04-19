@@ -41,7 +41,7 @@
         <artifactId>gatling-maven-plugin</artifactId>
         <version>${gatling-maven-plugin.version}</version>
         <configuration>
-          <simulationClass>simulations.BasicSimulation</simulationClass>
+          <simulationClass>simulations.TelemoSimulation</simulationClass>
         </configuration>
       </plugin>
     </plugins>

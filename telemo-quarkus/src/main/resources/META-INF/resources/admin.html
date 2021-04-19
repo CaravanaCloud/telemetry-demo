@@ -3,11 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <link rel="stylesheet" href="/coreui/perfect-scrollbar.css">
   <link rel="stylesheet" href="/coreui/coreui.min.css">
-
-  <title>CoreUI</title>
+  <link rel="stylesheet" href="admin.css">
+  <title>Telemetry Admin</title>
 </head>
 <body class="c-app">
   <div class="c-wrapper">
@@ -22,10 +21,10 @@
             <div class="col-sm">
               <div class="card">
                 <div class="card-header">
-                  Total Messages
+                  Total Heartbeats
                 </div>
                 <div class="card-body">
-                  <p class="card-text">12.345.789</p>
+                  <p id="count_heartbeats" class="card-text">???</p>
                 </div>
               </div>
             </div>
@@ -33,10 +32,10 @@
             <div class="col-sm">
               <div class="card">
                 <div class="card-header">
-                  Total Devices
+                  Total Sources
                 </div>
                 <div class="card-body">
-                  <p class="card-text">12.345.789</p>
+                  <p id="count_sources" class="card-text">???</p>
                 </div>
               </div>
             </div>
@@ -47,7 +46,7 @@
                   Lowest Battery %
                 </div>
                 <div class="card-body">
-                  <p class="card-text">5</p>
+                  <p id="min_battery" class="card-text">???</p>
                 </div>
               </div>
             </div>
@@ -62,8 +61,9 @@
   </div>
 <!-- Optional JavaScript -->
 <!-- Popper.js first, then CoreUI JS -->
-<script src="/coreui/popper.js"></script>
-<script src="/coreui/perfect-scrollbar.min.js"></script>
-<script src="/coreui/coreui.min.js"></script>
+  <script src="/coreui/popper.js"></script>
+  <script src="/coreui/perfect-scrollbar.min.js"></script>
+  <script src="/coreui/coreui.min.js"></script>
+  <script src="/admin.js"></script>
 </body>
 </html>

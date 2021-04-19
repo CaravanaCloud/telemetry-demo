@@ -69,6 +69,10 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-h2</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-mysql</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -107,6 +111,7 @@
     </plugins>
   </build>
   <profiles>
+
     <profile>
       <id>native</id>
       <activation>
@@ -141,5 +146,7 @@
         <quarkus.package.type>native</quarkus.package.type>
       </properties>
     </profile>
+
+
   </profiles>
 </project>

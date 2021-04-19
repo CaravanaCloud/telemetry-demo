@@ -19,4 +19,10 @@ public class HeartbeatService {
     public void persist(Heartbeat hb) {
         em.persist(hb);
     }
+
+    public Heartbeat merge(Heartbeat hb){
+        return em.merge(hb);
+    }
+
+
 }

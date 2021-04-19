@@ -10,6 +10,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="scala-sdk-2.13.5" level="application" />
     <orderEntry type="library" name="Maven: io.gatling.highcharts:gatling-charts-highcharts:3.5.1" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.13.3" level="project" />
     <orderEntry type="library" name="Maven: io.gatling:gatling-app:3.5.1" level="project" />
@@ -80,6 +81,5 @@
     <orderEntry type="library" name="Maven: com.typesafe.akka:akka-actor_2.13:2.6.11" level="project" />
     <orderEntry type="library" name="Maven: com.typesafe:config:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang.modules:scala-java8-compat_2.13:0.9.0" level="project" />
-    <orderEntry type="library" name="scala-sdk-2.13.5" level="application" />
   </component>
 </module>

@@ -45,10 +45,7 @@ function geoFindMe() {
       sendTelemetry();
     }
 
-    function success(position) {
-      lat  = position.coords.latitude;
-      lng = position.coords.longitude;
-
+    function geoGoTo(lat, lng){
       mymap.setView([lat, lng], zoom);
 
       circle = L.circle([lat, lng], {
@@ -71,8 +68,14 @@ function geoFindMe() {
       sendTelemetry();
     }
 
+    function success(position) {
+      geoGoTo(position.coords.latitude,
+          position.coords.longitude);
+    }
+
     function error() {
       console.log('Unable to retrieve your location');
+      geoGoTo(lat, lng);
     }
 
   if(!navigator.geolocation) {
