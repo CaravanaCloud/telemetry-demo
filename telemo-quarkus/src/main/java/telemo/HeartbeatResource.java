@@ -70,7 +70,7 @@ public class HeartbeatResource {
         var hbs = findAll();
         var count_heartbeats = hbs.size();
         var count_sources = hbs.stream()
-                               .map(hb -> hb.getSourceIP())
+                               .map(hb -> hb.getSourceUUID())
                                .distinct()
                                .count();
         hbs.sort(Comparator.comparing(Heartbeat::getBatteryLevel));

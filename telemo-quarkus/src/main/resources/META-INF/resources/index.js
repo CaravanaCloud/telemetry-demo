@@ -27,15 +27,19 @@ function randomUUID() {
 }
 
 function decrementBattery(){
-  batteryLevel -= 1;
+  if (batteryLevel > 0){
+    batteryLevel -= 1;
+  }
   texttip.setContent(batteryLevel + "");
 }
 
 function changeColor(){
-  c_fill = randomColor();
-  circle.setStyle({
-    fillColor: c_fill
-  });
+  if (batteryLevel > 0) {
+    c_fill = randomColor();
+    circle.setStyle({
+      fillColor: c_fill
+    });
+  }
 }
 
 function geoFindMe() {
@@ -130,7 +134,7 @@ function sendTelemetry(){
     "lng": lng,
     "createTime": new Date().toISOString(),
     "displayColor": c_fill,
-    "batteryLevel": batteryLevel}
+    "batteryLevel": batteryLevel }
   xmlHttp.send(JSON.stringify(state));
 }
 
