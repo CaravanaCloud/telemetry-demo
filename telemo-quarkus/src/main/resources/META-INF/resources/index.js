@@ -45,7 +45,9 @@ function geoFindMe() {
       sendTelemetry();
     }
 
-    function geoGoTo(lat, lng){
+    function geoGoTo(_lat, _lng){
+      lat = _lat;
+      lng = _lng;
       mymap.setView([lat, lng], zoom);
 
       circle = L.circle([lat, lng], {

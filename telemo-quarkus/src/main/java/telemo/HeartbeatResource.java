@@ -4,6 +4,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,25 @@ public class HeartbeatResource {
     @Produces(APPLICATION_JSON)
     public List<Heartbeat> getAll(){
         return findAll();
+    }
+
+    @Path("latest")
+    @GET
+    @Produces(APPLICATION_JSON)
+    public Collection<Heartbeat> getLatest(){
+        var hbs = findAll();
+        var map = new HashMap<String,Heartbeat>();
+        for (Heartbeat hb:hbs){
+            var sourceUUID = hb.getSourceUUID();
+            var current = map.get(sourceUUID);
+            if (current == null
+                || hb.getCreateTime().isAfter(current.getCreateTime()) ){
+                map.put(sourceUUID,hb);
+            }
+        }
+
+        Collection<Heartbeat> values = map.values();
+        return values;
     }
 
     @Path("stats")

@@ -6,3 +6,7 @@
 .card-text {
   font-size: 0.8em;
 }
+
+#mapid {
+  height: 50vh;
+}
