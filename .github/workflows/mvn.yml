@@ -22,8 +22,9 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Build Quarkus Module [Verify]
-        run: mvn --batch-mode --update-snapshots verify -Dquarkus-profile=dev
+
+      - name: Build Maven package
+        run: mvn --batch-mode --update-snapshots verify -DskipTests
         working-directory: telemo-quarkus
         env:
           MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
