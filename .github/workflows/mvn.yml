@@ -5,6 +5,18 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MYSQL_ROOT_PASSWORD: "Masterkey123"
+      QUARKUS_DATASOURCE_JDBC_URL: "jdbc:mysql://fakehost:3336/telemo-db"
+      QUARKUS_DATASOURCE_DB_KIND: "mysql"
+      QUARKUS_DATASOURCE_USERNAME: "root"
+      QUARKUS_DATASOURCE_PASSWORD: "Masterkey123"
+      QUARKUS_DATASOURCE_JDBC_MIN_SIZE: 2
+      QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE: 2
+      QUARKUS_DATASOURCE_JDBC_MAX_SIZE: 20
+      QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMOUT: 5
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "update"
+      GATLING_BASE_URL: "https://telemo.id42.cc"
 
     steps:
       - uses: actions/checkout@v2
