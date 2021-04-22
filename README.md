@@ -4,6 +4,9 @@ A sample application using modern Java and Cloud technologies.
 
 Featuring:
 - Quarkus
+- GraalVM
+- Gatling
+- AWS
 
 # Useful Commands
 
@@ -17,13 +20,13 @@ export QUARKUS_DATASOURCE_USERNAME="root"
 export QUARKUS_DATASOURCE_PASSWORD="Masterkey321"
 export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION="update"
 ```
-(All Quarkus Config Options)[https://quarkus.io/guides/all-config]
+[All Quarkus Config Options](https://quarkus.io/guides/all-config)
 
 ## Install direnv
 ```
 curl -sfL https://direnv.net/install.sh | bash
 ```
-## Load environment variables using (direnv)[https://direnv.net/]
+## Load environment variables using [direnv](https://direnv.net/)
 ```
 direnv allow
 ```
