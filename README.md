@@ -26,37 +26,48 @@ mvn io.quarkus:quarkus-maven-plugin:1.13.2.Final:create \
 ## MySQL
 
 ### Start MySQL in a Container
+```
 docker run -p 3336:3306 \
     --name telemo-mysql \
     -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
     -e MYSQL_DATABASE=telemo-db \
     -d mysql:latest
-
+```
 ### List containers to verify
+```
 docker container ls
-
+```
 ### Connect to MySQL
+```
 mysql --host=127.0.0.1 --port=3336 -uroot -p$MYSQL_ROOT_PASSWORD
-
+```
 ### Run tests and generate reports
+```
 ./mvnw verify
-
+```
 ### Start Quarkus in Dev Mode
+```
 ./mvnw quarkus:dev
-
+```
 ### Package Uber Jar Executable
+```
 ./mvnw package -Dquarkus.package.type=uber-jar
-
+```
 ### Start Application
+```
 java -jar target/telemo-quarkus-1.0.0-SNAPSHOT-runner.jar
-
+```
 ### Fire gatling
+```
 mvn gatling:test
-
+```
 ### Package Local Native Executable
+```
 /mvnw package -Pnative
-
+```
 ### Package Container Native Executable
+```
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
+```
 
 
