@@ -37,9 +37,10 @@ jobs:
       - name: Check AWS authentication
         run: aws sts get-caller-identity
 
-#      - name: Generate API EB package
-#        run: zip -j ./target/eb.zip ./target/tdc-api-1.0.0-SNAPSHOT-runner.jar ./src/main/eb/Procfile
-#        working-directory: tdc-api
+      - name: Generate API EB package
+        run: zip -j ./target/telemo-eb.zip ./target/telemo-quarkus-1.0.0-SNAPSHOT-runner.jar ./src/main/eb/Procfile
+        working-directory: telemo-quarkus
+
 #      - name: Deploy API to EB
 #        uses: einaregilsson/beanstalk-deploy@v16
 #        with:

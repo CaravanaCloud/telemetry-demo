@@ -68,19 +68,19 @@ docker container ls
 ```
 ### Connect to MySQL
 ```
-mysql --host=127.0.0.1 --port=3336 -uroot -p$MYSQL_ROOT_PASSWORD
+mysql --host=127.0.0.1 --port=$MYSQL_PORT -uroot -p$MYSQL_ROOT_PASSWORD
 ```
 ### Run tests and generate reports
 ```
 ./mvnw verify
 ```
-### Package Uber Jar Executable
+### Package uber-jar Executable
 ```
 ./mvnw package -Dquarkus.package.type=uber-jar
 ```
-### Start Application
+### Start uber-jar
 ```
-java -jar target/telemo-quarkus-1.0.0-SNAPSHOT-runner.jar
+java -jar ./target/telemo-quarkus-1.0.0-SNAPSHOT-runner.jar
 ```
 ### Fire gatling
 ```
@@ -90,7 +90,7 @@ mvn gatling:test
 ```
 /mvnw package -Pnative
 ```
-### Package Container Native Executable
+### Package Container with Native Executable
 ```
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
 ```
