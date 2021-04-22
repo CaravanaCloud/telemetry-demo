@@ -8,26 +8,52 @@ Featuring:
 # Useful Commands
 
 ## Environment Variables (.envrc)
+```
 export MYSQL_ROOT_PASSWORD="Masterkey321"
-export QUARKUS_DATASOURCE_JDBC_URL="jdbc:mysql://localhost:3336/telemo-db"
+export MYSQL_PORT=3333
+export QUARKUS_DATASOURCE_JDBC_URL="jdbc:mysql://localhost:3333/telemo-db"
 export QUARKUS_DATASOURCE_DB_KIND="mysql"
 export QUARKUS_DATASOURCE_USERNAME="root"
 export QUARKUS_DATASOURCE_PASSWORD="Masterkey321"
-export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION="drop-and-create"
+export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION="update"
+```
+(All Quarkus Config Options)[https://quarkus.io/guides/all-config]
 
+## Install direnv
+```
+curl -sfL https://direnv.net/install.sh | bash
+```
+## Load environment variables using (direnv)[https://direnv.net/]
+```
+direnv allow
+```
+## Install sdkman
+```
+curl -s "https://get.sdkman.io" | bash
+```
+## Install graalvm
+```
+sdk install java 21.0.0.2.r11-grl
+```
+## Install maven
+```
+sdk install maven
+```
 ## Generate Quarkus Application
-
+```
 mvn io.quarkus:quarkus-maven-plugin:1.13.2.Final:create \
 -DprojectGroupId=telemo \
 -DprojectArtifactId=telemo-quarkus \
 -DclassName="telemo.HeartbeatResource" \
 -Dpath="/hb"
-
-## MySQL
-
+```
+### Start Quarkus in Dev Mode
+```
+./mvnw quarkus:dev
+```
 ### Start MySQL in a Container
 ```
-docker run -p 3336:3306 \
+docker run -p $MYSQL_PORT:3306 \
     --name telemo-mysql \
     -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
     -e MYSQL_DATABASE=telemo-db \
@@ -44,10 +70,6 @@ mysql --host=127.0.0.1 --port=3336 -uroot -p$MYSQL_ROOT_PASSWORD
 ### Run tests and generate reports
 ```
 ./mvnw verify
-```
-### Start Quarkus in Dev Mode
-```
-./mvnw quarkus:dev
 ```
 ### Package Uber Jar Executable
 ```
