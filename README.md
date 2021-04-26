@@ -56,7 +56,7 @@ mvn io.quarkus:quarkus-maven-plugin:1.13.2.Final:create \
 ```
 ### Start MySQL in a Container
 ```
-docker run -p $MYSQL_PORT:3306 \
+docker run --rm -p $MYSQL_PORT:3306 \
     --name telemo-mysql \
     -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
     -e MYSQL_DATABASE=telemo-db \
@@ -76,7 +76,7 @@ mysql --host=127.0.0.1 --port=$MYSQL_PORT -uroot -p$MYSQL_ROOT_PASSWORD
 ```
 ### Package uber-jar Executable
 ```
-./mvnw package -Dquarkus.package.type=uber-jar
+./mvnw clean package -Dquarkus.package.type=uber-jar
 ```
 ### Start uber-jar
 ```

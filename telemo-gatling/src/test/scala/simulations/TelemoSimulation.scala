@@ -49,9 +49,9 @@ class TelemoSimulation extends Simulation {
   setUp(
     scn.inject(
       // atOnceUsers(1)
-      incrementUsersPerSec(25)
+      incrementUsersPerSec(10)
         .times(4)
-        .eachLevelLasting(15.seconds)
+        .eachLevelLasting(25.seconds)
         .startingFrom(2)
     )
   ).protocols(httpProtocol)
