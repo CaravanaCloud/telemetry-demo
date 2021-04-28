@@ -24,6 +24,7 @@ variable "instance_type" {
 variable "vpc_id" {}
 variable "subnets" {}
 variable "ssl_arn" {}
+variable "bucket_name" {}
 variable "QUARKUS_DATASOURCE_JDBC_URL" {}
 variable "QUARKUS_DATASOURCE_DB_KIND" {}
 variable "QUARKUS_DATASOURCE_USERNAME" {}
@@ -45,13 +46,9 @@ resource "aws_elastic_beanstalk_application" "telemo_app" {
   name = "telemo-eb-app-${local.env_alias}"
 }
 
-resource "aws_s3_bucket" "telemo_bucket" {
-  bucket = "telemo-bucket-${local.env_alias}"
-}
-
 resource "aws_s3_bucket_object" "telemo_object" {
   key     = "telemo-eb-${local.timelabel}.zip"
-  bucket  = aws_s3_bucket.telemo_bucket.bucket
+  bucket  = var.bucket_name
   source  = "../../../target/telemo-eb.zip"
 }
 
@@ -59,7 +56,7 @@ resource "aws_elastic_beanstalk_application_version" "telemo_version" {
   name        = "telemo-version-${local.env_alias}-${local.timelabel}"
   application = aws_elastic_beanstalk_application.telemo_app.name
   description = "application version created by terraform"
-  bucket      = aws_s3_bucket.telemo_bucket.id
+  bucket      = var.bucket_name
   key         = aws_s3_bucket_object.telemo_object.id
 }
 
