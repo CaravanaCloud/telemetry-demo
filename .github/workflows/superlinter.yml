@@ -37,6 +37,7 @@ jobs:
           VALIDATE_PYTHON_ISORT: false
           #
           VALIDATE_TERRAFORM: false
+          VALIDATE_TERRAFORM_TERRASCAN: false
           VALIDATE_JAVA: false
           VALIDATE_HTML: false
           #
