@@ -21,8 +21,6 @@ jobs:
       TF_VAR_subnets: ${{ secrets.subnets }}
       TF_VAR_ssl_arn: ${{ secrets.ssl_arn }}
 
-
-
     steps:
       - uses: actions/checkout@v2
       - uses: nelonoel/branch-name@v1.0.1
@@ -64,4 +62,4 @@ jobs:
         run: ./apply_eb.sh
         working-directory: telemo-quarkus/src/main/eb/
         env:
-          TV_VAR_env_name: ${BRANCH_NAME}
+          TV_VAR_env_name: ${{ env.BRANCH_NAME }}
