@@ -6,6 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      QUARKUS_DATASOURCE_DB_KIND: "mysql"
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "update"
+      QUARKUS_DATASOURCE_JDBC_URL: ${{ secrets.jdbc_url }}
+      QUARKUS_DATASOURCE_USERNAME: ${{ secrets.jdbc_username }}
+      QUARKUS_DATASOURCE_PASSWORD: ${{ secrets.jdbc_password }}
       TF_VAR_QUARKUS_DATASOURCE_DB_KIND: "mysql"
       TF_VAR_QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "update"
       TF_VAR_QUARKUS_DATASOURCE_JDBC_URL: ${{ secrets.jdbc_url }}
@@ -33,7 +38,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build Maven package
-        run: mvn --batch-mode --update-snapshots verify -DskipTests -Dquarkus.package.type=uber-jar
+        run: mvn --batch-mode --update-snapshots -DskipTests -Dquarkus.package.type=uber-jar clean package
         working-directory: telemo-quarkus
         env:
           MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
