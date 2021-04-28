@@ -22,6 +22,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: nelonoel/branch-name@v1.0.1
 
       - uses: DeLaGuardo/setup-graalvm@4.0
         with:
@@ -59,3 +60,5 @@ jobs:
       - name: Apply terraform
         run: ./apply_eb.sh
         working-directory: telemo-quarkus/src/main/eb/
+        env:
+          TV_VAR_env_name: ${BRANCH_NAME}

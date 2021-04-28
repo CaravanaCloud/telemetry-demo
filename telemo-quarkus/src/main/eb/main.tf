@@ -6,11 +6,6 @@ terraform {
   }
 }
 
-locals {
-  timestamp = timestamp()
-  timelabel = replace(local.timestamp, "/[- TZ:]/", "")
-}
-
 variable "env_name" {
   type    = string
   default = "tfenv"
@@ -35,12 +30,18 @@ variable "QUARKUS_DATASOURCE_USERNAME" {}
 variable "QUARKUS_DATASOURCE_PASSWORD" {}
 variable "QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION" {}
 
+locals {
+  timestamp = timestamp()
+  timelabel = replace(local.timestamp, "/[- TZ:]/", "")
+  env_alias = replace(var.env_name, "/[/]/", "")
+}
+
 resource "aws_elastic_beanstalk_application" "telemo_app" {
-  name = "telemo-eb-app-${var.env_name}"
+  name = "telemo-eb-app-${local.env_alias}"
 }
 
 resource "aws_s3_bucket" "telemo_bucket" {
-  bucket = "telemo-bucket-${var.env_name}"
+  bucket = "telemo-bucket-${local.env_alias}"
 }
 
 resource "aws_s3_bucket_object" "telemo_object" {
@@ -50,7 +51,7 @@ resource "aws_s3_bucket_object" "telemo_object" {
 }
 
 resource "aws_elastic_beanstalk_application_version" "telemo_version" {
-  name        = "telemo-eb-${local.timelabel}"
+  name        = "telemo-version-${local.env_alias}-${local.timelabel}"
   application = aws_elastic_beanstalk_application.telemo_app.name
   description = "application version created by terraform"
   bucket      = aws_s3_bucket.telemo_bucket.id
@@ -58,7 +59,7 @@ resource "aws_elastic_beanstalk_application_version" "telemo_version" {
 }
 
 resource "aws_elastic_beanstalk_environment" "telemo_env" {
-  name                = "telemo-eb-env-${var.env_name}"
+  name                = "telemo-eb-env-${local.env_alias}"
   application         = aws_elastic_beanstalk_application.telemo_app.name
   solution_stack_name = "64bit Amazon Linux 2 v3.1.7 running Corretto 11"
   version_label       = aws_elastic_beanstalk_application_version.telemo_version.id
