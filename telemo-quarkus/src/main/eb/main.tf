@@ -36,6 +36,11 @@ locals {
   env_alias = replace(var.env_name, "/[/]/", "")
 }
 
+module "local_env_name" {
+  source  = "matti/resource/shell"
+  command = "echo ${local.env_alias}"
+}
+
 resource "aws_elastic_beanstalk_application" "telemo_app" {
   name = "telemo-eb-app-${local.env_alias}"
 }
