@@ -13,8 +13,13 @@ sam deploy -t target/sam.jvm.yaml \
 
 export QUARKUS_LAMBDA=$(aws cloudformation describe-stack-resources \
     --stack-name "${ENV_NAME}" \
-    --query "StackResources[?LogicalResourceId=='TelemoQuarkus']" \
+    --query "StackResources[?LogicalResourceId=='TelemoQuarkus'].PhysicalResourceId" \
     --output "text")
+
+echo "Wait stack [$QUARKUS_LAMBDA]"
+sleep 5
+aws cloudformation wait stack-create-complete \
+    --stack-name "${ENV_NAME}"
 
 echo "Setting Quarkus Lambda env [$QUARKUS_LAMBDA]"
 aws lambda wait function-exists --function-name "$QUARKUS_LAMBDA"
@@ -29,7 +34,7 @@ lenv="$lenv }"
 
 lvpc="SubnetIds=$TF_VAR_subnets,SecurityGroupIds=$TF_VAR_lambda_secg"
 
-echo "Setting lambda environment"
+echo "Update config for [$QUARKUS_LAMBDA]"
 echo "$lenv"
 echo "---"
 echo "vpc-config"
@@ -39,7 +44,7 @@ echo "role"
 echo "$TF_VAR_lambda_role"
 
 echo "wait before update..."
-sleep 30
+sleep 20
 
 aws lambda update-function-configuration \
   --function-name "${QUARKUS_LAMBDA}" \
