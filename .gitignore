@@ -30,4 +30,9 @@ target/
 *.pem
 
 .envrc
-.envrc
+
+lambdahttp
+.terraform
+*.tfstate*
+.terraform*
+*out.*

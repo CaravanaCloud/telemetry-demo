@@ -13,7 +13,7 @@ Featuring:
 ## Environment Variables (.envrc)
 ```
 export MYSQL_ROOT_PASSWORD="Masterkey321"
-export MYSQL_PORT=3333
+export MYSQL_PORT=3334
 export QUARKUS_DATASOURCE_JDBC_URL="jdbc:mysql://localhost:3333/telemo-db"
 export QUARKUS_DATASOURCE_DB_KIND="mysql"
 export QUARKUS_DATASOURCE_USERNAME="root"
