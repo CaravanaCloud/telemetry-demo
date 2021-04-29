@@ -37,7 +37,7 @@ jobs:
       - name: Check AWS authentication
         run: aws sts get-caller-identity
 
-      - name: Terraform init
+      - name: Terraform backend init
         run: |
           export TF_VAR_env_name=${BRANCH_NAME/\//}
           echo "# Terraform Init"
