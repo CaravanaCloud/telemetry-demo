@@ -6,6 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      AWS_REGION: "us-east-1"
       QUARKUS_DATASOURCE_DB_KIND: "mysql"
       QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "update"
       QUARKUS_DATASOURCE_JDBC_URL: ${{ secrets.jdbc_url }}
