@@ -37,11 +37,13 @@ jobs:
       - name: Check AWS authentication
         run: aws sts get-caller-identity
 
-      - name: Terraform init
-        run: terraform init -upgrade -backend-config="bucket=${{ env.TF_VAR_bucket_name }}" -backend-config="key=terraform/${{ env.TF_VAR_env_name }}/terraform_state" -backend-config="region=${{ env.AWS_REGION }}"
+      - name: Terraform backend init
+        run: |
+          export TF_VAR_env_name=${BRANCH_NAME/\//}
+          echo "# Terraform Init"
+          echo terraform init -upgrade -backend-config="bucket=${{ env.TF_VAR_bucket_name }}" -backend-config="key=terraform/${{ env.TF_VAR_env_name }}/terraform_state" -backend-config="region=${{ env.AWS_REGION }}"
+          terraform init -upgrade -backend-config="bucket=${{ env.TF_VAR_bucket_name }}" -backend-config="key=terraform/${{ env.TF_VAR_env_name }}/terraform_state" -backend-config="region=${{ env.AWS_REGION }}"
         working-directory: telemo-quarkus/src/main/eb/
-        env:
-          TF_VAR_env_name: ${{ env.BRANCH_NAME }}
 
       - name: Terraform refresh
         run: terraform refresh
