@@ -1,0 +1,69 @@
+name: DeployToEB
+
+on:
+  push:
+    branches:
+      - 'lambda/**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: "us-east-1"
+      QUARKUS_DATASOURCE_DB_KIND: "mysql"
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "update"
+      QUARKUS_DATASOURCE_JDBC_URL: ${{ secrets.jdbc_url }}
+      QUARKUS_DATASOURCE_USERNAME: ${{ secrets.jdbc_username }}
+      QUARKUS_DATASOURCE_PASSWORD: ${{ secrets.jdbc_password }}
+      TF_VAR_QUARKUS_DATASOURCE_DB_KIND: "mysql"
+      TF_VAR_QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "update"
+      TF_VAR_QUARKUS_DATASOURCE_JDBC_URL: ${{ secrets.jdbc_url }}
+      TF_VAR_QUARKUS_DATASOURCE_USERNAME: ${{ secrets.jdbc_username }}
+      TF_VAR_QUARKUS_DATASOURCE_PASSWORD: ${{ secrets.jdbc_password }}
+      TF_VAR_bucket_name: ${{ secrets.bucket_name }}
+      TF_VAR_vpc_id: ${{ secrets.vpc_id }}
+      TF_VAR_subnets: ${{ secrets.subnets }}
+      TF_VAR_ssl_arn: ${{ secrets.ssl_arn }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nelonoel/branch-name@v1.0.1
+
+      - uses: DeLaGuardo/setup-graalvm@4.0
+        with:
+          graalvm: '21.0.0.2'
+          java: 'java11'
+          arch: 'amd64'
+      - run: java -version
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build Maven package
+        run: mvn --batch-mode --update-snapshots -DskipTests -Plambda clean package
+        working-directory: telemo-quarkus
+        env:
+          MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Check AWS authentication
+        run: aws sts get-caller-identity
+
+      - name: Deploy to SAM
+        run: |
+          sam deploy -t target/sam.jvm.yaml \
+              --stack-name "${TF_VAR_env_name}" \
+              --s3-bucket "${TF_VAR_bucket_name//\//X}" \
+              --s3-prefix "sam" \
+              --capabilities "CAPABILITY_NAMED_IAM"
+        working-directory: telemo-quarkus
+
+
