@@ -16,7 +16,7 @@ export QUARKUS_LAMBDA=$(aws cloudformation describe-stack-resources \
     --query "StackResources[?LogicalResourceId=='TelemoQuarkus'].PhysicalResourceId" \
     --output "text")
 
-echo "Wait stack [$QUARKUS_LAMBDA]"
+echo "Wait stack [$QUARKUS_LAMBDA]" 
 sleep 5
 aws cloudformation wait stack-create-complete \
     --stack-name "${ENV_NAME}"
