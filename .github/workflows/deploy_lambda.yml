@@ -23,8 +23,8 @@ jobs:
       TF_VAR_vpc_id: ${{ secrets.vpc_id }}
       TF_VAR_subnets: ${{ secrets.subnets }}
       TF_VAR_ssl_arn: ${{ secrets.ssl_arn }}
-      TF_VAR_lambda_secg=${{ secrets.lambda_secg }}
-      TF_VAR_lambda_role=${{ secrets.lambda_role }}
+      TF_VAR_lambda_secg: ${{ secrets.lambda_secg }}
+      TF_VAR_lambda_role: ${{ secrets.lambda_role }}
 
     steps:
       - uses: actions/checkout@v2
