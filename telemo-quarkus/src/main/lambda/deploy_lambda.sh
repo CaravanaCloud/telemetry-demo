@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export SAM_CLI_TELEMETRY=0
 export ENV_NAME="${BRANCH_NAME/\//}"
 echo "SAM deploy to stack $ENV_NAME"
 
@@ -37,7 +38,7 @@ echo "role"
 echo "$TF_VAR_lambda_role"
 
 echo "wait before update..."
-sleep 10
+sleep 15
 
 aws lambda update-function-configuration \
   --function-name "${QUARKUS_LAMBDA}" \
