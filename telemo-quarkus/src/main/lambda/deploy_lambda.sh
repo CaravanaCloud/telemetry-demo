@@ -1,13 +1,17 @@
 #!/bin/bash
 
+export ENV_NAME="${BRANCH_NAME/\//}"
+
+echo "SAM deploy to stack $ENV_NAME"
+
 sam deploy -t target/sam.jvm.yaml \
-    --stack-name "${TF_VAR_env_name}" \
+    --stack-name "${ENV_NAME}" \
     --s3-bucket "${TF_VAR_bucket_name}" \
     --s3-prefix "sam" \
     --capabilities "CAPABILITY_NAMED_IAM"
 
 export QUARKUS_LAMBDA=$(aws cloudformation describe-stack-resources \
-    --stack-name "${TF_VAR_env_name}" \
+    --stack-name "${ENV_NAME}" \
     --query "StackResources[?LogicalResourceId=='TelemoQuarkus']" \
     --output "text")
 
@@ -44,7 +48,7 @@ aws lambda update-function-configuration \
   --output "text"
 
 export QUARKUS_API=$(aws cloudformation describe-stacks \
-    --stack-name "${TF_VAR_env_name}" \
+    --stack-name "${ENV_NAME}" \
     --query "Stacks[0].Outputs[?OutputKey=='TelemoQuarkusApi'].OutputValue" \
     --output "text")
 
