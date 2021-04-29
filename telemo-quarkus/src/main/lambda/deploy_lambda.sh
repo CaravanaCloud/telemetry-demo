@@ -39,7 +39,7 @@ echo "role"
 echo "$TF_VAR_lambda_role"
 
 echo "wait before update..."
-sleep 15
+sleep 30
 
 aws lambda update-function-configuration \
   --function-name "${QUARKUS_LAMBDA}" \
