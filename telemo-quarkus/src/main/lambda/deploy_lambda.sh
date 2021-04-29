@@ -8,7 +8,8 @@ sam deploy -t target/sam.jvm.yaml \
     --stack-name "${ENV_NAME}" \
     --s3-bucket "${TF_VAR_bucket_name}" \
     --s3-prefix "sam" \
-    --capabilities "CAPABILITY_NAMED_IAM"
+    --capabilities "CAPABILITY_NAMED_IAM" \
+    --no-progressbar
 
 export QUARKUS_LAMBDA=$(aws cloudformation describe-stack-resources \
     --stack-name "${ENV_NAME}" \
