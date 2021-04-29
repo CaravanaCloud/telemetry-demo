@@ -1,7 +1,6 @@
 #!/bin/bash
 
 export ENV_NAME="${BRANCH_NAME/\//}"
-
 echo "SAM deploy to stack $ENV_NAME"
 
 sam deploy -t target/sam.jvm.yaml \
