@@ -1,9 +1,9 @@
-name: DeployToEB
+name: DeployToLambda
 
 on:
-  delete:
+  push:
     branches:
-      - 'eb/**'
+      - 'lambda/**'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,10 +23,32 @@ jobs:
       TF_VAR_vpc_id: ${{ secrets.vpc_id }}
       TF_VAR_subnets: ${{ secrets.subnets }}
       TF_VAR_ssl_arn: ${{ secrets.ssl_arn }}
+      TF_VAR_lambda_secg: ${{ secrets.lambda_secg }}
+      TF_VAR_lambda_role: ${{ secrets.lambda_role }}
 
     steps:
       - uses: actions/checkout@v2
       - uses: nelonoel/branch-name@v1.0.1
+
+      - uses: DeLaGuardo/setup-graalvm@4.0
+        with:
+          graalvm: '21.0.0.2'
+          java: 'java11'
+          arch: 'amd64'
+      - run: java -version
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build Maven package
+        run: mvn --batch-mode --update-snapshots -DskipTests -Plambda clean package
+        working-directory: telemo-quarkus
+        env:
+          MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -37,20 +59,7 @@ jobs:
       - name: Check AWS authentication
         run: aws sts get-caller-identity
 
-      - name: Terraform init
-        run: terraform init -upgrade -backend-config="bucket=${{ env.TF_VAR_bucket_name }}" -backend-config="key=terraform/${{ env.TF_VAR_env_name }}/terraform_state" -backend-config="region=${{ env.AWS_REGION }}"
-        working-directory: telemo-quarkus/src/main/eb/
-        env:
-          TF_VAR_env_name: ${{ env.BRANCH_NAME }}
-
-      - name: Terraform refresh
-        run: terraform refresh
-        working-directory: telemo-quarkus/src/main/eb/
-        env:
-          TF_VAR_env_name: ${{ env.BRANCH_NAME }}
-
-      - name: Terraform destroy
-        run: terraform destroy -auto-approve
-        working-directory: telemo-quarkus/src/main/eb/
-        env:
-          TF_VAR_env_name: ${{ env.BRANCH_NAME }}
+      - name: Delete SAM stack
+        run: |
+          aws cloudformation delete-stack --stack-name "${BRANCH_NAME/\//}"
+        working-directory: telemo-quarkus
