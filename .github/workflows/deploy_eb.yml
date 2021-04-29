@@ -76,4 +76,3 @@ jobs:
       - name: Terraform output
         run: terraform output
         working-directory: telemo-quarkus/src/main/eb/
-
