@@ -58,10 +58,5 @@ jobs:
         run: aws sts get-caller-identity
 
       - name: Deploy to SAM
-        run: |
-          sam deploy -t target/sam.jvm.yaml \
-              --stack-name "${TF_VAR_env_name}" \
-              --s3-bucket "${TF_VAR_bucket_name//\//X}" \
-              --s3-prefix "sam" \
-              --capabilities "CAPABILITY_NAMED_IAM"
+        run: ./src/main/lambda/deploy_lambda.sh
         working-directory: telemo-quarkus
