@@ -1,4 +1,4 @@
-name: DeployToEB
+name: DestroyEB
 
 on:
   delete:

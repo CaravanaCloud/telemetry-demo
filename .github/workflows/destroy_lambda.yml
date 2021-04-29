@@ -1,4 +1,4 @@
-name: DeployToLambda
+name: DestroyLambda
 
 on:
   push:
