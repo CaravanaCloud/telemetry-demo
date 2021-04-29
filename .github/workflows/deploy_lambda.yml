@@ -65,5 +65,3 @@ jobs:
               --s3-prefix "sam" \
               --capabilities "CAPABILITY_NAMED_IAM"
         working-directory: telemo-quarkus
-
-
