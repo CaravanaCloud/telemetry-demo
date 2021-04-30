@@ -1,0 +1,10 @@
+name: Zimblimblin
+
+on: push
+
+jobs:
+  meu-job:
+    name: Automatiza um hello
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Oi Mundo!!!"
