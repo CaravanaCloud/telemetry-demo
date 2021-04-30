@@ -43,7 +43,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build Maven package
-        run: mvn --batch-mode --update-snapshots package
+        run: mvn --batch-mode --update-snapshots -Peb package
         working-directory: telemo-quarkus
         env:
           MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
