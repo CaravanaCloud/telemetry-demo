@@ -9,7 +9,6 @@ terraform {
 
 variable "env_name" {
   type    = string
-  default = "tf/env"
 
   validation {
     condition     = can(regex("[A-Za-z0-9-]*", var.env_name))
