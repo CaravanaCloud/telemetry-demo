@@ -43,7 +43,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build Maven package
-        run: mvn --batch-mode --update-snapshots -DskipTests -Dquarkus.package.type=uber-jar clean package
+        run: mvn --batch-mode --update-snapshots package
         working-directory: telemo-quarkus
         env:
           MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
@@ -56,10 +56,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - name: Check AWS authentication
         run: aws sts get-caller-identity
-
-      - name: Generate API EB package
-        run: zip -j ./target/telemo-eb.zip ./target/telemo-quarkus-1.0.0-SNAPSHOT-runner.jar ./src/main/eb/Procfile
-        working-directory: telemo-quarkus
 
       - name: Terraform backend init
         run: ./apply.sh

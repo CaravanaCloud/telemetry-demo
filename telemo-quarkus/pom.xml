@@ -17,6 +17,7 @@
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
     <quarkus.platform.version>1.13.2.Final</quarkus.platform.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+    <skipTests>true</skipTests>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -106,11 +107,43 @@
             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
             <maven.home>${maven.home}</maven.home>
           </systemPropertyVariables>
+          <skipTests>${skipTests}</skipTests>
         </configuration>
       </plugin>
     </plugins>
   </build>
   <profiles>
+    <profile>
+      <id>eb</id>
+      <activation>
+        <property>
+          <name>eb</name>
+        </property>
+      </activation>
+      <properties>
+        <quarkus.package.type>uber-jar</quarkus.package.type>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+              <descriptor>src/assembly/bin.xml</descriptor>
+              <finalName>telemo</finalName>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
     <profile>
       <id>lambda</id>
