@@ -12,7 +12,7 @@ variable "env_name" {
   default = "tf/env"
 
   validation {
-    condition     = can(regex("[A-Za-z0-9]*", var.env_name))
+    condition     = can(regex("[A-Za-z0-9-]*", var.env_name))
     error_message = "Environment name must not have weird chars."
   }
 }

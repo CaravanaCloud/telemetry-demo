@@ -1,0 +1,10 @@
+name: HelloWorld
+
+on: push
+
+jobs:
+  meu-job:
+    name: Hello World
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello World"

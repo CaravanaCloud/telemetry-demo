@@ -59,6 +59,6 @@ jobs:
       - name: Check AWS authentication
         run: aws sts get-caller-identity
 
-      - name: Deploy to SAM
-        run: ./src/main/lambda/deploy_lambda.sh
-        working-directory: telemo-quarkus
+      - name: Terraform apply
+        run: ./apply.sh
+        working-directory: telemo-quarkus/src/main/lambda/
