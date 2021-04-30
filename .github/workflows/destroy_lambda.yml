@@ -22,9 +22,13 @@ jobs:
       TF_VAR_bucket_name: ${{ secrets.bucket_name }}
       TF_VAR_vpc_id: ${{ secrets.vpc_id }}
       TF_VAR_subnets: ${{ secrets.subnets }}
+      TF_VAR_subnet_a: ${{ secrets.subnet_a }}
+      TF_VAR_subnet_b: ${{ secrets.subnet_b }}
+      TF_VAR_subnet_c: ${{ secrets.subnet_c }}
       TF_VAR_ssl_arn: ${{ secrets.ssl_arn }}
       TF_VAR_lambda_secg: ${{ secrets.lambda_secg }}
       TF_VAR_lambda_role: ${{ secrets.lambda_role }}
+
 
     steps:
       - uses: actions/checkout@v2
