@@ -62,28 +62,7 @@ jobs:
         working-directory: telemo-quarkus
 
       - name: Terraform backend init
-        run: |
-          export TF_VAR_env_name=${BRANCH_NAME/\//}
-          echo "# Terraform Init [$TF_VAR_env_name]"
-          echo terraform init -upgrade -force-copy \
-            -backend-config="bucket=$TF_VAR_bucket_name" \
-            -backend-config="key=terraform/${TF_VAR_env_name}/terraform_state" \
-            -backend-config="region=${{ env.AWS_REGION }}"
-          terraform init -upgrade -force-copy \
-            -backend-config="bucket=${{ env.TF_VAR_bucket_name }}" \
-            -backend-config="key=terraform/${TF_VAR_env_name}/terraform_state" \
-            -backend-config="region=${{ env.AWS_REGION }}"
+        run: ./apply.sh
         working-directory: telemo-quarkus/src/main/eb/
         env:
           TF_VAR_env_name: ${{ env.BRANCH_NAME }}
-
-      - name: Terraform apply
-        run: |
-          export TF_VAR_env_name=${BRANCH_NAME/\//}
-          echo "# Terraform apply [$TF_VAR_env_name]"
-          terraform apply -auto-approve
-        working-directory: telemo-quarkus/src/main/eb/
-
-      - name: Terraform output
-        run: terraform output
-        working-directory: telemo-quarkus/src/main/eb/
