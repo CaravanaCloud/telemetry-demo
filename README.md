@@ -8,6 +8,15 @@ Featuring:
 - Gatling
 - AWS
 
+# Exploring with Jupyter
+
+Start a jupyter notebook instance:
+```
+pip install jupyter
+jupyter notebook
+```
+
+
 # Useful Commands
 
 ## Environment Variables (.envrc)

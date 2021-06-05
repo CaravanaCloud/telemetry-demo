@@ -12,7 +12,7 @@ public class HeartbeatService {
 
     public List<Heartbeat> findAll() {
         return em
-            .createQuery("SELECT hb FROM Heartbeat hb", Heartbeat.class)
+            .createNamedQuery("Heartbeat.findAll", Heartbeat.class)
             .getResultList();
     }
 

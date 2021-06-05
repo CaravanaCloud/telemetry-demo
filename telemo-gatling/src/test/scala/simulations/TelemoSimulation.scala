@@ -34,25 +34,32 @@ class TelemoSimulation extends Simulation {
       "displayColor": "#000000",
       "batteryLevel": 100
     }"""
+
+  val get_fibo = http("get_fibo").get("/api/algos/fibo").queryParam("x","10")
+
   val get_hb = http("get_hb").get("/api/hb")
+
   val post_hb = http("post_hb").post("/api/hb")
     .header("content-type","application/json")
     .body(StringBody(post_hb_body))
 
   val get_stats = http("get_stats").get("/api/hb/stats")
+
   val scn = scenario("Telemetry Scenario")
+    .exec(get_fibo)
     .exec(get_hb)
     .exec(post_hb)
     .exec(get_stats)
-    .pause(1)
+
 
   setUp(
     scn.inject(
-      // atOnceUsers(1)
-      incrementUsersPerSec(10)
-        .times(4)
-        .eachLevelLasting(25.seconds)
-        .startingFrom(2)
+      //DEBUG atOnceUsers(1)
+      incrementUsersPerSec(6)
+        .times(5)
+        .eachLevelLasting(5.minutes)
+        .separatedByRampsLasting(1.minutes)
+        .startingFrom(1)
     )
   ).protocols(httpProtocol)
 }
