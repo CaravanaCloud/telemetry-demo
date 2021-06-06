@@ -9,11 +9,18 @@ import org.slf4j.LoggerFactory
 import ch.qos.logback.classic.{Level, LoggerContext}
 
 class TelemoSimulation extends Simulation {
+  
+  def getEnv(name:String, deft:String):String = 
+    sys.env.getOrElse(name,deft)
+    
+  def getInt(name:String, deft:Int):Int =
+    getEnv(name,""+deft).toInt
+  
   val logLevel = "WARN"
   val context = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
   context.getLogger("io.gatling.http").setLevel(Level.valueOf(logLevel))
 
-  var baseUrl = sys.env.getOrElse("GATLING_BASE_URL", "http://localhost:8080")
+  var baseUrl = getEnv("GATLING_BASE_URL", "http://localhost:8080")
   var acceptHdr = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
   var doNotTrackHdr = "1"
   var userAgentHdr = "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
@@ -52,13 +59,18 @@ class TelemoSimulation extends Simulation {
     .exec(get_stats)
 
 
+  val incUsersPerSec = getInt("GATLING_USERS_SEC", 2)
+  val incTimes = getInt("GATLING_TIMES", 5)
+  val lvlDuration = getInt("GATLING_LEVEL_MINUTES",5).minutes
+  val rampDuration = getInt("GATLING_RAMP_MINUTES",1).minutes
+  
   setUp(
     scn.inject(
       //DEBUG atOnceUsers(1)
-      incrementUsersPerSec(5)
-        .times(5)
-        .eachLevelLasting(5.minutes)
-        .separatedByRampsLasting(1.minutes)
+      incrementUsersPerSec(incUsersPerSec)
+        .times(incTimes)
+        .eachLevelLasting(lvlDuration)
+        .separatedByRampsLasting(rampDuration)
         .startingFrom(1)
     )
   ).protocols(httpProtocol)

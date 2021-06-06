@@ -1,3 +1,4 @@
+export MYSQL_ROOT_USER=root
 export MYSQL_ROOT_PASSWORD=Masterkey321
 export MYSQL_HOST=127.0.0.1
 export MYSQL_PORT=3334
@@ -9,6 +10,20 @@ export QUARKUS_DATASOURCE_PASSWORD=Masterkey321
 export DATASOURCE_DB_KIND=mysql
 export ORM_GENERATION=update
 
-export LOCAL_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
+export GATLING_USERS_SEC=2
+export GATLING_TIMES=5
+export GATLING_LEVEL_MINUTES=5
 
-echho QUARKUS_DATASOURCE_JDBC_URL
+export LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+
+export RDS_NETGRP=telemo-netgrp
+export RDS_NAME=telemo-mysql
+export EB_BUCKET=telemo-bucket
+export EB_APP=telemo-app 
+export EB_CNAME=telemo-env
+export EB_TEMPLATE=telemo-cfg
+export EB_VERSION=telemo-v1
+export EB_VERSION_KEY=telemo-eb/telemo-eb.zip
+export EB_ENV=telemo-env
+
+echo QUARKUS_DATASOURCE_JDBC_URL
