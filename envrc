@@ -1,0 +1,14 @@
+export MYSQL_ROOT_PASSWORD=Masterkey321
+export MYSQL_HOST=127.0.0.1
+export MYSQL_PORT=3334
+export MYSQL_DB=telemodb
+
+export QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}
+export QUARKUS_DATASOURCE_USERNAME=root
+export QUARKUS_DATASOURCE_PASSWORD=Masterkey321
+export DATASOURCE_DB_KIND=mysql
+export ORM_GENERATION=update
+
+export LOCAL_IPV4=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
+
+echho QUARKUS_DATASOURCE_JDBC_URL
