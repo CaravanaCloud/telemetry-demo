@@ -55,7 +55,7 @@ class TelemoSimulation extends Simulation {
   setUp(
     scn.inject(
       //DEBUG atOnceUsers(1)
-      incrementUsersPerSec(6)
+      incrementUsersPerSec(5)
         .times(5)
         .eachLevelLasting(5.minutes)
         .separatedByRampsLasting(1.minutes)

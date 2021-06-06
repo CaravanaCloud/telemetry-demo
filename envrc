@@ -9,6 +9,6 @@ export QUARKUS_DATASOURCE_PASSWORD=Masterkey321
 export DATASOURCE_DB_KIND=mysql
 export ORM_GENERATION=update
 
-export LOCAL_IPV4=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
+export LOCAL_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
 
 echho QUARKUS_DATASOURCE_JDBC_URL
