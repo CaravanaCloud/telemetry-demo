@@ -13,16 +13,19 @@ export DATASOURCE_JDBC_INITIAL_SIZE=20
 export DATASOURCE_JDBC_MIN_SIZE=1
 export DATASOURCE_JDBC_MAX_SIZE=250
 
-export GATLING_BASE_URL=http://localhost:8080
+export GATLING_BASE_URL=http://telemo-27245.us-west-2.elasticbeanstalk.com
+# export GATLING_BASE_URL=http://localhost:8080
 export GATLING_USERS_SEC=1
 export GATLING_TIMES=5
 export GATLING_LEVEL_MINUTES=5
 
 export LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
 
-export EB_SEED=$RANDOM
+
 export RDS_NETGRP=telemo-netgrp
 export RDS_NAME=telemo-mysql
+
+export EB_SEED=$RANDOM
 export EB_BUCKET=telemo-bucket
 export EB_APP=telemo-app 
 export EB_CNAME=telemo-$EB_SEED
@@ -34,6 +37,8 @@ export EB_ROLE=telemo-role
 export EB_PROFILE=telemo-role
 export EB_INSTANCE_TYPES=c5.2xlarge,c4.2xlarge,m5.2xlarge,t3.2xlarge
 export EB_SPOT=false
+
+export LAMBDA_ROLE=telemo-fn-role
 
 echo QUARKUS_DATASOURCE_JDBC_URL
 echo EB_ENV

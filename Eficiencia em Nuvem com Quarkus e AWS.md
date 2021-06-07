@@ -4,6 +4,7 @@ Repo: https://github.com/CaravanaCloud/telemetry-demo
 
 Economize na conta de cloud e entendenda o desempenho de sua aplicaçao
 
+Os comandos abaixos foram testados no RHEL, mas funcionam igualmente em outras distribuiçoes.
 
 # Ferramentas Recomendadas
 ```
@@ -17,7 +18,8 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 ## GraalVM
 ```
-sdk install java 21.1.0.r16-grl
+sdk install java 21.1.0.r11-grl 
+gu install native-image
 ```
 
 ## Maven
@@ -77,6 +79,12 @@ mvn -f telemo-gatling/pom.xml clean compile gatling:test
 ```
 python -m http.server 8000 --directory /tmp/
 ```
+
+# Native Build
+```
+mvn -f telemo-quarkus/pom.xml clean package -Pnative
+```
+
 
 
 ## AWS
@@ -245,6 +253,14 @@ aws elasticbeanstalk create-environment \
 ```
 
 # AWS Lambda
+```
+aws iam create-role --role-name $LABMDA_ROLE --assume-role-policy-document file://lambda-role-trust.json
+aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowAPIs --policy-document file://lambda-role-trust.json
+
+
+```
+
+
 
 
 # Conclusion
