@@ -9,21 +9,31 @@ export QUARKUS_DATASOURCE_USERNAME=root
 export QUARKUS_DATASOURCE_PASSWORD=Masterkey321
 export DATASOURCE_DB_KIND=mysql
 export ORM_GENERATION=update
+export DATASOURCE_JDBC_INITIAL_SIZE=20
+export DATASOURCE_JDBC_MIN_SIZE=1
+export DATASOURCE_JDBC_MAX_SIZE=250
 
-export GATLING_USERS_SEC=2
+export GATLING_BASE_URL=http://localhost:8080
+export GATLING_USERS_SEC=1
 export GATLING_TIMES=5
 export GATLING_LEVEL_MINUTES=5
 
 export LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
 
+export EB_SEED=$RANDOM
 export RDS_NETGRP=telemo-netgrp
 export RDS_NAME=telemo-mysql
 export EB_BUCKET=telemo-bucket
 export EB_APP=telemo-app 
-export EB_CNAME=telemo-env
+export EB_CNAME=telemo-$EB_SEED
 export EB_TEMPLATE=telemo-cfg
 export EB_VERSION=telemo-v1
 export EB_VERSION_KEY=telemo-eb/telemo-eb.zip
-export EB_ENV=telemo-env
+export EB_ENV=telemo-env-$EB_SEED
+export EB_ROLE=telemo-role
+export EB_PROFILE=telemo-role
+export EB_INSTANCE_TYPES=c5.2xlarge,c4.2xlarge,m5.2xlarge,t3.2xlarge
+export EB_SPOT=false
 
 echo QUARKUS_DATASOURCE_JDBC_URL
+echo EB_ENV

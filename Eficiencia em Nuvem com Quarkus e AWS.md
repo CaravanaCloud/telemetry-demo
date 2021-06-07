@@ -2,6 +2,8 @@
 
 Repo: https://github.com/CaravanaCloud/telemetry-demo
 
+Economize na conta de cloud e entendenda o desempenho de sua aplicaçao
+
 
 # Ferramentas Recomendadas
 ```
@@ -165,6 +167,7 @@ aws rds create-db-subnet-group \
     
 
 export RDS_ID=$(aws rds create-db-instance \
+  --db-name $MYSQL_DB  \
   --db-instance-identifier $RDS_NAME \
   --allocated-storage 20 \
   --db-instance-class db.t3.large \
@@ -183,7 +186,15 @@ echo $RDS_ID
 
 export RDS_ENDPOINT=$(aws rds describe-db-instances  \
   --db-instance-identifier $RDS_ID  \
-  --query "DBInstances[0]".Endpoint.Address)
+  --query "DBInstances[0].Endpoint.Address"  \
+  --output text)
+  
+export RDS_PORT=$(aws rds describe-db-instances  \
+  --db-instance-identifier $RDS_ID  \
+  --query "DBInstances[0].Endpoint.Port"\
+  --output text)
+
+echo $RDS_ENDPOINT:$RDS_PORT
 ```
 
 
@@ -191,6 +202,13 @@ export RDS_ENDPOINT=$(aws rds describe-db-instances  \
 ```
 aws s3 mb s3://$EB_BUCKET
 aws elasticbeanstalk create-application --application-name $EB_APP
+aws iam create-role --role-name $EB_ROLE --assume-role-policy-document file://eb-ip-trust.json
+aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowS3 --policy-document file://eb-ip-trust.json
+aws iam create-instance-profile --instance-profile-name eb-instance-profile
+aws iam add-role-to-instance-profile --instance-profile-name eb-instance-profile --role-name $EB_ROLE
+
+
+
 
 mvn -f telemo-quarkus/pom.xml clean package -Peb
 aws s3 cp ./telemo-quarkus/target/telemo-eb.zip s3://$EB_BUCKET/$EB_VERSION_KEY
@@ -218,13 +236,15 @@ envsubst < options.txt.env > options.txt
 
 ```
 aws elasticbeanstalk create-environment \
-    --cname-prefix my-cname \
-    --application-name my-app \
-    --template-name v1 \
-    --version-label v1 \
-    --environment-name v1clone \
+    --cname-prefix $EB_CNAME \
+    --application-name $EB_APP \
+    --template-name $EB_TEMPLATE \
+    --version-label $EB_VERSION \
+    --environment-name $EB_ENV \
     --option-settings file://options.txt
 ```
+
+# AWS Lambda
 
 
 # Conclusion
