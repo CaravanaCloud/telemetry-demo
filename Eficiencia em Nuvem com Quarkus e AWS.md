@@ -20,6 +20,9 @@ SSH
 Github
 ```
 git clone git@github.com:CaravanaCloud/telemetry-demo.git 
+git config --global user.name "Julio Faerman"
+git config --global user.email julio@noemail.com
+
 ```
 
 EBS Resize
@@ -329,7 +332,7 @@ aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowAPIs --policy-do
 ```
 
 ```
-mvn -f telemo-quarkus/pom.xml clean package -Plambda
+mvn -f telemo-quarkus/pom.xml clean package -Plambda -Dquarkus.package.type=native
 ```
 
 ```
@@ -362,18 +365,57 @@ aws lambda update-function-configuration \
     
 ```
 
+# AWS Lambda Native
 
+```
+sam deploy --guided -t target/sam.native.yaml 
+```
+
+
+```
+export LAMBDA_NATIVE=$(aws cloudformation describe-stack-resources \
+    --stack-name $SAM_NATIVE_STACK \
+    --logical-resource-id TelemoQuarkusNative \
+    --query "StackResources[0].PhysicalResourceId" \
+    --output text) 
+
+echo $LAMBDA_NATIVE
+
+aws lambda update-function-configuration \
+    --function-name $LAMBDA_NATIVE \
+    --memory-size 8192 \
+    --timeout 900 \
+    --environment "Variables={\
+        QUARKUS_DATASOURCE_JDBC_URL=$RDS_JDBC,\
+        QUARKUS_DATASOURCE_USERNAME=$QUARKUS_DATASOURCE_USERNAME,\
+        QUARKUS_DATASOURCE_PASSWORD=$QUARKUS_DATASOURCE_PASSWORD,\
+        DATASOURCE_DB_KIND=$DATASOURCE_DB_KIND,\
+        ORM_GENERATION=$ORM_GENERATION,\
+        DATASOURCE_JDBC_INITIAL_SIZE=10,\
+        DATASOURCE_JDBC_MIN_SIZE=1,\
+        DATASOURCE_JDBC_MAX_SIZE=100}" \
+    --output json 
+
+```
+
+# Holy Grail?
+
+¯\_(ツ)_/¯
 
 # Conclusion
 
+5- Test your compute costs to define "normal".
+4- Undertand your percentiles and detect "anomalies".
+3- Beware of Database Pooling and HTTP Caching / Throttling.
+2- Make it as fast as needed, but not faster.
+1- Try the [Telemetry Demo](https://github.com/CaravanaCloud/telemetry-demo)!
+
 ## Gatling Results
 
+[Local JVM](https://s3-us-west-2.amazonaws.com/faermanj.me/telemosimulation_local_jvm_c52xlarge_20210607010245004/index.html)
+[Local Native](https://s3-us-west-2.amazonaws.com/faermanj.me/telemosimulation_local_native_c52xlarge_20210607084658441/index.html)
+[Elastic Beanstalk](https://s3-us-west-2.amazonaws.com/faermanj.me/telemosimulation_eb_20210605185313815/index.html)
 
-
-4- Test your compute costs to define "normal".
-3- Undertand your percentiles and detect "anomalies".
-2- Beware of Database Pooling and HTTP Caching / Throttling
-1- Try the [Telemetry Demo](https://github.com/CaravanaCloud/telemetry-demo)!
 
 Thank you!
 

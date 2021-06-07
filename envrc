@@ -40,6 +40,7 @@ export EB_SPOT=false
 
 export LAMBDA_ROLE=telemo-fn-role
 export SAM_JVM_STACK=telemo1
+export SAM_NATIVE_STACK=telemo4
 
 # TODO: Replace with queries
 export NET_A=subnet-0e6a19f9adc46f026
