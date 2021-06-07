@@ -4,11 +4,57 @@ Repo: https://github.com/CaravanaCloud/telemetry-demo
 
 Economize na conta de cloud e entendenda o desempenho de sua aplicaçao
 
-Os comandos abaixos foram testados no RHEL, mas funcionam igualmente em outras distribuiçoes.
+Os comandos abaixos foram testados no Amazon Linux, mas funcionam igualmente em outras distribuiçoes.
 
 # Ferramentas Recomendadas
+
+
+## [Cloud9](https://aws.amazon.com/cloud9/)
+
+SSH
 ```
+ ssh-keygen 
+ 
 ```
+
+Github
+```
+git clone git@github.com:CaravanaCloud/telemetry-demo.git 
+```
+
+EBS Resize
+```
+sudo growpart /dev/nvme0n1 1
+sudo xfs_growfs -d /
+
+```
+
+Security Group
+```
+export C9_SECG=$(curl -s http://169.254.169.254/latest/meta-data/security-groups/)
+export C9_MAC=$(curl -s http://169.254.169.254/latest/meta-data/network/interfaces/macs/)
+export C9_VPC=$(curl -s http://169.254.169.254/latest/meta-data/network/interfaces/macs/${C9_MAC}/vpc-id)
+
+export C9_SECG_ID=$(aws ec2 describe-security-groups \
+    --filter Name=vpc-id,Values=$C9_VPC Name=group-name,Values=$C9_SECG \
+    --query 'SecurityGroups[*].[GroupId]' \
+    --output text)
+
+echo $C9_SECG_ID
+
+aws ec2 authorize-security-group-ingress \
+	--group-id $C9_SECG_ID \
+	--protocol tcp \
+	--port 8080 \
+	--cidr 0.0.0.0/0
+
+aws ec2 authorize-security-group-ingress \
+	--group-id $C9_SECG_ID \
+	--protocol tcp \
+	--port 8000 \
+	--cidr 0.0.0.0/0
+```
+
 
 ## SDK Man
 ```
@@ -31,7 +77,9 @@ sdk install maven
 
 ```
 curl -sfL https://direnv.net/install.sh | bash
+echo "" >> $HOME/.bashrc
 echo \"$(direnv hook bash)\" >> $HOME/.bashrc
+echo "" >> $HOME/.bashrc
 eval "$(direnv hook bash)"
 ln -s envrc .envrc
 direnv allow .
@@ -61,11 +109,18 @@ docker ps
 mysql --host=$MYSQL_HOST --port=$MYSQL_PORT -uroot -p$MYSQL_ROOT_PASSWORD
 
 ```
-https://github.com/CaravanaCloud/telemetry-demo
+
+
 # Telemetry Demo
 ```
  mvn -f telemo-quarkus/pom.xml clean compile quarkus:dev
+```
 
+```
+export C9_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+echo $C9_IP
+echo http://$C9_IP:8080/index.html
+echo http://$C9_IP:8080/admin.html
 ```
 
 (Device Page)[http://localhost:8080/index.html]
@@ -85,6 +140,9 @@ python -m http.server 8000 --directory /tmp/
 mvn -f telemo-quarkus/pom.xml clean package -Pnative
 ```
 
+```
+ ./telemo-quarkus/target/telemo-quarkus-1.0.0-SNAPSHOT-runner 
+```
 
 
 ## AWS
@@ -151,6 +209,7 @@ aws ec2 modify-subnet-attribute --subnet-id $NET_B --map-public-ip-on-launch
 # AWS RDS 
 
 ```
+
 export RDS_SECG=$(aws ec2 create-security-group \
 	--group-name telemo-rds-secgrp \
 	--description "telemo-rds-secg" \
@@ -159,6 +218,13 @@ export RDS_SECG=$(aws ec2 create-security-group \
 	--output text)
 
 echo $RDS_SECG
+
+export RDS_SECG_ID=$(aws ec2 describe-security-groups \
+    --filter Name=vpc-id,Values=$VPC_ID Name=group-name,Values=telemo-rds-secgrp \
+    --query 'SecurityGroups[*].[GroupId]' \
+    --output text)
+    
+echo $RDS_SECG_ID
 	
 aws ec2 authorize-security-group-ingress \
 	--group-id $RDS_SECG \
@@ -191,6 +257,8 @@ export RDS_ID=$(aws rds create-db-instance \
   --output text)
 
 echo $RDS_ID
+export RDS_ID=telemo-mysql
+
 
 export RDS_ENDPOINT=$(aws rds describe-db-instances  \
   --db-instance-identifier $RDS_ID  \
@@ -202,7 +270,9 @@ export RDS_PORT=$(aws rds describe-db-instances  \
   --query "DBInstances[0].Endpoint.Port"\
   --output text)
 
-echo $RDS_ENDPOINT:$RDS_PORT
+export RDS_JDBC=jdbc:mysql://$RDS_ENDPOINT:$RDS_PORT/$MYSQL_DB
+echo $RDS_JDBC
+
 ```
 
 
@@ -214,8 +284,6 @@ aws iam create-role --role-name $EB_ROLE --assume-role-policy-document file://eb
 aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowS3 --policy-document file://eb-ip-trust.json
 aws iam create-instance-profile --instance-profile-name eb-instance-profile
 aws iam add-role-to-instance-profile --instance-profile-name eb-instance-profile --role-name $EB_ROLE
-
-
 
 
 mvn -f telemo-quarkus/pom.xml clean package -Peb
@@ -249,24 +317,62 @@ aws elasticbeanstalk create-environment \
     --template-name $EB_TEMPLATE \
     --version-label $EB_VERSION \
     --environment-name $EB_ENV \
+    --output json \
     --option-settings file://options.txt
 ```
 
 # AWS Lambda
 ```
-aws iam create-role --role-name $LABMDA_ROLE --assume-role-policy-document file://lambda-role-trust.json
+aws iam create-role --role-name $LAMBDA_ROLE --assume-role-policy-document file://lambda-role-trust.json
 aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowAPIs --policy-document file://lambda-role-trust.json
-
 
 ```
 
+```
+mvn -f telemo-quarkus/pom.xml clean package -Plambda
+```
+
+```
+sam deploy --guided -t target/sam.jvm.yaml 
+```
+
+```
+export LAMBDA_JVM=$(aws cloudformation describe-stack-resources \
+    --stack-name $SAM_JVM_STACK \
+    --logical-resource-id TelemoQuarkus \
+    --query "StackResources[0].PhysicalResourceId" \
+    --output text) 
+
+echo $LAMBDA_JVM
+
+aws lambda update-function-configuration \
+    --function-name $LAMBDA_JVM \
+    --memory-size 8192 \
+    --timeout 900 \
+    --environment "Variables={\
+        QUARKUS_DATASOURCE_JDBC_URL=$RDS_JDBC,\
+        QUARKUS_DATASOURCE_USERNAME=$QUARKUS_DATASOURCE_USERNAME,\
+        QUARKUS_DATASOURCE_PASSWORD=$QUARKUS_DATASOURCE_PASSWORD,\
+        DATASOURCE_DB_KIND=$DATASOURCE_DB_KIND,\
+        ORM_GENERATION=$ORM_GENERATION,\
+        DATASOURCE_JDBC_INITIAL_SIZE=10,\
+        DATASOURCE_JDBC_MIN_SIZE=1,\
+        DATASOURCE_JDBC_MAX_SIZE=100}" \
+    --output json 
+    
+```
 
 
 
 # Conclusion
 
-3- Test your compute costs to define "normal".
-2- Undertand your percentiles and detect "anomalies".
+## Gatling Results
+
+
+
+4- Test your compute costs to define "normal".
+3- Undertand your percentiles and detect "anomalies".
+2- Beware of Database Pooling and HTTP Caching / Throttling
 1- Try the [Telemetry Demo](https://github.com/CaravanaCloud/telemetry-demo)!
 
 Thank you!
