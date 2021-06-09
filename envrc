@@ -1,3 +1,9 @@
+export AWS_PROFILE=openshift-dev
+export AWS_REGION=us-west-2
+
+
+export UNIQ="jufaerma$(date +'%Y%m%d')"
+
 export MYSQL_ROOT_USER=root
 export MYSQL_ROOT_PASSWORD=Masterkey321
 export MYSQL_HOST=127.0.0.1
@@ -13,22 +19,24 @@ export DATASOURCE_JDBC_INITIAL_SIZE=20
 export DATASOURCE_JDBC_MIN_SIZE=1
 export DATASOURCE_JDBC_MAX_SIZE=250
 
-export GATLING_BASE_URL=https://1cbztvsen2.execute-api.us-west-2.amazonaws.com
+# export GATLING_BASE_URL=https://1cbztvsen2.execute-api.us-west-2.amazonaws.com
 # export GATLING_BASE_URL=http://telemo-27245.us-west-2.elasticbeanstalk.com
 # export GATLING_BASE_URL=http://localhost:8080
 export GATLING_USERS_SEC=1
 export GATLING_TIMES=5
 export GATLING_LEVEL_MINUTES=5
 
-export LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+export C9_ITYPE=c5.2xlarge
 
 export RDS_NETGRP=telemo-netgrp
 export RDS_NAME=telemo-mysql
+export RDS_ROOT_USER=root
+export RDS_ROOT_PASSWORD=Masterkey321
 
-export EB_SEED=$RANDOM
-export EB_BUCKET=telemo-bucket
-export EB_APP=telemo-app 
-export EB_CNAME=telemo-$EB_SEED
+export UNIQ=jufaerma$RANDOM
+export EB_BUCKET=telemo-bucket-$UNIQ
+export EB_APP=telemo-app
+export EB_CNAME=telemo-$UNIQ
 export EB_TEMPLATE=telemo-cfg
 export EB_VERSION=telemo-v1
 export EB_VERSION_KEY=telemo-eb/telemo-eb.zip
@@ -41,11 +49,6 @@ export EB_SPOT=false
 export LAMBDA_ROLE=telemo-fn-role
 export SAM_JVM_STACK=telemo1
 export SAM_NATIVE_STACK=telemo4
-
-# TODO: Replace with queries
-export NET_A=subnet-0e6a19f9adc46f026
-export NET_B=subnet-053baadb01741414f
-export VPC_ID=vpc-085a1211f81d07506
 
 
 echo QUARKUS_DATASOURCE_JDBC_URL

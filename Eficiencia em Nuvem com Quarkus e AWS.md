@@ -1,35 +1,268 @@
 # Eficiencia em Nuvem com Quarkus e AWS
 
-Repo: https://github.com/CaravanaCloud/telemetry-demo
+Economize na conta de cloud e entendenda o desempenho de sua aplicaçao.
 
-Economize na conta de cloud e entendenda o desempenho de sua aplicaçao
+Repository: https://github.com/CaravanaCloud/telemetry-demo
+
+Ask me anything: https://faermanj.me/ama
 
 Os comandos abaixos foram testados no Amazon Linux, mas funcionam igualmente em outras distribuiçoes.
 
-# Ferramentas Recomendadas
+# [AWS Cloud Shell](https://aws.amazon.com/cloudshell/)
 
+https://us-west-2.console.aws.amazon.com/cloudshell/home?region=us-west-2
+
+```
+export UNIQ="jufaerma$(date +'%Y%m%d')"
+
+echo $UNIQ
+```
+## [AWS VPC](https://aws.amazon.com/vpc/)
+Create and configure the VPC
+```
+export VPC_ID=$(aws ec2 create-vpc \
+    --cidr-block 10.0.0.0/16 \
+    --query "Vpc.VpcId" \
+    --output text)
+
+echo export VPC_ID=$VPC_ID
+
+aws ec2 create-tags --resources $VPC_ID \
+    --tags Key=Name,Value="vpc-$UNIQ"
+    
+export VPC_ID2=$(aws ec2 describe-vpcs \
+    --filter --filters Name=tag:Name,Values="vpc-$UNIQ" \
+    --query "Vpcs[0].VpcId"
+    --output text)
+
+echo export VPC_ID=$VPC_ID2   
+
+aws ec2   modify-vpc-attribute \
+  --enable-dns-hostnames \
+  --vpc-id $VPC_ID
+  
+aws ec2   modify-vpc-attribute \
+  --enable-dns-support \
+  --vpc-id $VPC_ID
+
+```
+
+Create and setup the Internet Gateway
+```
+export IGW_ID=$(aws ec2 create-internet-gateway \
+    --query "InternetGateway.InternetGatewayId" \
+    --output text)
+    
+echo $IGW_ID
+
+aws ec2 attach-internet-gateway --vpc-id $VPC_ID --internet-gateway-id $IGW_ID
+```
+
+Setup the public Route Table
+```
+export RTB_ID=$(aws ec2 create-route-table \
+    --vpc-id $VPC_ID \
+    --query "RouteTable.RouteTableId" \
+    --output text)
+
+echo export RTB_ID=$RTB_ID
+
+aws ec2 create-route \
+    --route-table-id $RTB_ID \
+    --destination-cidr-block 0.0.0.0/0 \
+    --gateway-id $IGW_ID
+
+```
+
+Setup the public Subnets
+
+Availability Zone A
+```
+export NET_A=$(aws ec2 create-subnet \
+    --vpc-id $VPC_ID \
+    --cidr-block 10.0.200.0/24 \
+    --availability-zone us-west-2a \
+    --query "Subnet.SubnetId" \
+    --output text)
+    
+echo export NET_A=$NET_A
+
+aws ec2 associate-route-table \
+    --subnet-id $NET_A \
+     --route-table-id $RTB_ID
+     
+aws ec2 modify-subnet-attribute  \
+    --subnet-id $NET_A  \
+    --map-public-ip-on-launch
+```
+Availability Zone B
+```
+export NET_B=$(aws ec2 create-subnet \
+    --vpc-id $VPC_ID \
+    --cidr-block 10.0.201.0/24 \
+    --availability-zone us-west-2b \
+    --query "Subnet.SubnetId" \
+    --output text)
+    
+echo export NET_B=$NET_B
+
+aws ec2 associate-route-table \
+    --subnet-id $NET_B \
+     --route-table-id $RTB_ID
+     
+aws ec2 modify-subnet-attribute  \
+    --subnet-id $NET_B  \
+    --map-public-ip-on-launch
+```
+
+
+# AWS RDS
+Databases can take a few minutes to become available.
+
+```
+export RDS_NETGRP=telemo-netgrp
+export RDS_NAME=telemo-mysql
+export RDS_ROOT_USER=root
+export RDS_ROOT_PASSWORD=Masterkey321
+export RDS_PORT=3306
+export RDS_CIDR=0.0.0.0/0
+export RDS_DB=telemodb
+```
+
+```
+export RDS_SECG=$(aws ec2 create-security-group \
+  --group-name telemo-rds-secgrp \
+  --description "telemo-rds-secg" \
+  --vpc-id $VPC_ID \
+  --query "GroupId" \
+  --output text)
+
+echo export RDS_SECG=$RDS_SECG
+
+export RDS_SECG_ID=$(aws ec2 describe-security-groups \
+  --filter Name=vpc-id,Values=$VPC_ID Name=group-name,Values=telemo-rds-secgrp \
+  --query 'SecurityGroups[*].[GroupId]' \
+  --output text)
+    
+echo export RDS_SECG_ID=$RDS_SECG_ID
+	
+aws ec2 authorize-security-group-ingress \
+  --group-id $RDS_SECG \
+  --protocol tcp \
+  --port $RDS_PORT \
+  --cidr $RDS_CIDR
+
+aws rds create-db-subnet-group \
+    --db-subnet-group-name $RDS_NETGRP \
+    --db-subnet-group-description "Telemo RDS Subnet Group" \
+    --subnet-ids $NET_A $NET_B
+    
+
+export RDS_ID=$(aws rds create-db-instance \
+  --db-name $RDS_DB  \
+  --db-instance-identifier $RDS_NAME \
+  --allocated-storage 20 \
+  --db-instance-class db.t3.large \
+  --engine mysql \
+  --engine-version 5.7 \
+  --master-username $RDS_ROOT_USER \
+  --master-user-password $RDS_ROOT_PASSWORD \
+  --db-subnet-group-name  $RDS_NETGRP \
+  --backup-retention-period 0 \
+  --publicly-accessible \
+  --vpc-security-group-ids $RDS_SECG \
+  --query "DBInstance.DBInstanceIdentifier" \
+  --output text)
+
+echo export RDS_ID=$RDS_ID
+
+aws rds wait db-instance-available --db-instance-identifier $RDS_ID
+
+export RDS_ENDPOINT=$(aws rds describe-db-instances  \
+  --db-instance-identifier $RDS_ID  \
+  --query "DBInstances[0].Endpoint.Address"  \
+  --output text)
+  
+export RDS_PORT=$(aws rds describe-db-instances  \
+  --db-instance-identifier $RDS_ID  \
+  --query "DBInstances[0].Endpoint.Port"\
+  --output text)
+
+export RDS_JDBC=jdbc:mysql://$RDS_ENDPOINT:$RDS_PORT/$MYSQL_DB
+echo export RDS_JDBC=$RDS_JDBC
+
+```
+
+```
+echo export VPC_ID=$VPC_ID
+echo export NET_A=$NET_A
+echo export NET_B=$NET_B
+echo export RDS_ID=$RDS_ID
+echo export RDS_JDBC=$RDS_JDBC
+```
 
 ## [Cloud9](https://aws.amazon.com/cloud9/)
 
-SSH
-```
- ssh-keygen 
- 
-```
-
-Github
-```
-git clone git@github.com:CaravanaCloud/telemetry-demo.git 
-git config --global user.name "Julio Faerman"
-git config --global user.email julio@noemail.com
+* Shareable
+* Scale
+* Reproducible
+* Restorable
+* Proximal
 
 ```
+export C9_ITYPE=t3.2xlarge
+export C9_ID=$(aws cloud9 create-environment-ec2 \
+    --name "ide-$UNIQ" \
+    --instance-type "$C9_ITYPE" \
+    --subnet-id $NET_A \
+    --automatic-stop-time-minutes 240 \
+    --query "environmentId" \
+    --output text)
+
+echo https://us-west-2.console.aws.amazon.com/cloud9/ide/$C9_ID
+
+aws cloud9 describe-environment-status \
+    --environment-id $C9_ID 
+```
+
+# Inside C9
+
+Homebrew
+```
+sudo passwd ec2-user
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/ec2-user/.bash_profile
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+brew install gcc
+```
+
+GitHub
+```
+brew install gh
+gh auth login
+
+git clone git@github.com:CaravanaCloud/telemetry-demo.git
+cd telemetry-demo 
+```
+
 
 EBS Resize
 ```
-sudo growpart /dev/nvme0n1 1
-sudo xfs_growfs -d /
+export INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+echo $INSTANCE_ID
 
+export VOL_ID=$(aws ec2 describe-volumes \
+    --filters Name=attachment.instance-id,Values=$INSTANCE_ID \
+    --query "Volumes[0].Attachments[0].VolumeId" \
+    --output text)
+echo $VOL_ID
+
+aws ec2 modify-volume --volume-id $VOL_ID --size 64
+
+sleep 10
+sudo growpart /dev/nvme0n1 1
+sudo resize2fs /dev/nvme0n1p1
+df -h
 ```
 
 Security Group
@@ -37,6 +270,10 @@ Security Group
 export C9_SECG=$(curl -s http://169.254.169.254/latest/meta-data/security-groups/)
 export C9_MAC=$(curl -s http://169.254.169.254/latest/meta-data/network/interfaces/macs/)
 export C9_VPC=$(curl -s http://169.254.169.254/latest/meta-data/network/interfaces/macs/${C9_MAC}/vpc-id)
+
+echo $C9_SECG
+echo $C9_MAC
+echo $C9_VPC
 
 export C9_SECG_ID=$(aws ec2 describe-security-groups \
     --filter Name=vpc-id,Values=$C9_VPC Name=group-name,Values=$C9_SECG \
@@ -58,7 +295,6 @@ aws ec2 authorize-security-group-ingress \
 	--cidr 0.0.0.0/0
 ```
 
-
 ## SDK Man
 ```
 curl -s "https://get.sdkman.io" | bash
@@ -69,6 +305,7 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 ```
 sdk install java 21.1.0.r11-grl 
 gu install native-image
+export JAVA_HOME=$HOME/.sdkman/candidates/java/current/
 ```
 
 ## Maven
@@ -81,12 +318,11 @@ sdk install maven
 ```
 curl -sfL https://direnv.net/install.sh | bash
 echo "" >> $HOME/.bashrc
-echo \"$(direnv hook bash)\" >> $HOME/.bashrc
+echo 'eval "$(direnv hook bash)"' >> $HOME/.bashrc
 echo "" >> $HOME/.bashrc
 eval "$(direnv hook bash)"
 ln -s envrc .envrc
 direnv allow .
-
 ```
 
 ## HTop
@@ -94,6 +330,22 @@ direnv allow .
 sudo yum -y install htop
 ```
 
+## AWS CLI
+
+```
+sudo pip uninstall awscli
+
+curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm rf ./aws
+/usr/local/bin/aws --version
+```
+
+## AWS Soundcheck
+```
+aws sts get-caller-identity --output json
+```
 
 # MySQL
 ```
@@ -101,7 +353,7 @@ docker run --rm -p $MYSQL_HOST:$MYSQL_PORT:3306 \
     --name telemo-mysql \
     -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
     -e MYSQL_DATABASE=$MYSQL_DB \
-    -d mysql:5.7
+    -d mysql:5.7 && docker logs telemo-mysql --follow 
 ```
 
 ```
@@ -110,13 +362,12 @@ docker ps
 
 ```
 mysql --host=$MYSQL_HOST --port=$MYSQL_PORT -uroot -p$MYSQL_ROOT_PASSWORD
-
 ```
-
 
 # Telemetry Demo
+
 ```
- mvn -f telemo-quarkus/pom.xml clean compile quarkus:dev
+mvn -f telemo-quarkus/pom.xml clean compile quarkus:dev
 ```
 
 ```
@@ -131,26 +382,32 @@ echo http://$C9_IP:8080/admin.html
 
 # Gatling
 ```
+export GATLING_BASE_URL=http://localhost:8080
+export GATLING_USERS_SEC=1
+export GATLING_TIMES=3
+export GATLING_LEVEL_MINUTES=2
 mvn -f telemo-gatling/pom.xml clean compile gatling:test
 ```
 
 ```
-python -m http.server 8000 --directory /tmp/
+pushd /home/ec2-user/environment/telemetry-demo/telemo-gatling/target/gatling/
+python -m http.server 8000
 ```
 
 # Native Build
 ```
-mvn -f telemo-quarkus/pom.xml clean package -Pnative
+export GRAALVM_VERSION="21.1.0" 
+mvn -f telemo-quarkus/pom.xml clean package -Pnative -Dquarkus.native.container-build=true
 ```
 
 ```
- ./telemo-quarkus/target/telemo-quarkus-1.0.0-SNAPSHOT-runner 
+ls ./telemo-quarkus/target/
+./telemo-quarkus/target/telemo-quarkus-1.0.0-SNAPSHOT-runner 
 ```
 
+More at: https://quarkus.io/guides/building-native-image
 
-## AWS
-
-# Pricing
+## AWS Pricing
 
 EC2 On-Demand: https://aws.amazon.com/ec2/pricing/on-demand/
 
@@ -160,135 +417,26 @@ Lambda Pricing: https://aws.amazon.com/lambda/pricing/
 
 https://aws.amazon.com/blogs/compute/container-reuse-in-lambda/#:~:text=AWS%20Lambda%20functions%20execute%20in,specified%20in%20the%20function's%20configuration.
 
-# AWS CLI
-
-```
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-```
-
-# VPC
-```
-aws ec2 create-vpc --cidr-block 10.0.0.0/16
-# export VPC_ID=vpc-085a1211f81d07506
-aws ec2   modify-vpc-attribute \
-  --enable-dns-hostnames \
-  --vpc-id $VPC_ID
-aws ec2   modify-vpc-attribute \
-  --enable-dns-support \
-  --vpc-id $VPC_ID
-
-```
-
-```
-aws ec2 create-internet-gateway
-# export IGW_ID=igw-0eab7f7ac63ad98c6
-aws ec2 attach-internet-gateway --vpc-id $VPC_ID --internet-gateway-id $IGW_ID
-```
-
-```
-aws ec2 create-route-table --vpc-id $VPC_ID
-# export RTB_ID=rtb-08720cd07d756369f
-aws ec2 create-route --route-table-id $RTB_ID --destination-cidr-block 0.0.0.0/0 --gateway-id $IGW_ID
-
-```
-
-
-```
-aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.100.0/24 --availability-zone us-west-2a
-# export NET_A=subnet-0e6a19f9adc46f026
-aws ec2 associate-route-table  --subnet-id $NET_A --route-table-id $RTB_ID
-aws ec2 modify-subnet-attribute --subnet-id $NET_A --map-public-ip-on-launch
-
-
-aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.101.0/24 --availability-zone us-west-2b
-# export NET_B=subnet-053baadb01741414f
-aws ec2 associate-route-table  --subnet-id $NET_B --route-table-id $RTB_ID
-aws ec2 modify-subnet-attribute --subnet-id $NET_B --map-public-ip-on-launch
-
-```
-
-# AWS RDS 
-
-```
-
-export RDS_SECG=$(aws ec2 create-security-group \
-	--group-name telemo-rds-secgrp \
-	--description "telemo-rds-secg" \
-	--vpc-id $VPC_ID \
-	--query "GroupId" \
-	--output text)
-
-echo $RDS_SECG
-
-export RDS_SECG_ID=$(aws ec2 describe-security-groups \
-    --filter Name=vpc-id,Values=$VPC_ID Name=group-name,Values=telemo-rds-secgrp \
-    --query 'SecurityGroups[*].[GroupId]' \
-    --output text)
-    
-echo $RDS_SECG_ID
-	
-aws ec2 authorize-security-group-ingress \
-	--group-id $RDS_SECG \
-	--protocol tcp \
-	--port 3306 \
-	--cidr 0.0.0.0/0
-```
-
-```
-aws rds create-db-subnet-group \
-    --db-subnet-group-name $RDS_NETGRP \
-    --db-subnet-group-description "Telemo RDS Subnet Group" \
-    --subnet-ids $NET_A $NET_B
-    
-
-export RDS_ID=$(aws rds create-db-instance \
-  --db-name $MYSQL_DB  \
-  --db-instance-identifier $RDS_NAME \
-  --allocated-storage 20 \
-  --db-instance-class db.t3.large \
-  --engine mysql \
-  --engine-version 5.7 \
-  --master-username $MYSQL_ROOT_USER \
-  --master-user-password $MYSQL_ROOT_PASSWORD \
-  --db-subnet-group-name  $RDS_NETGRP \
-  --backup-retention-period 0 \
-  --publicly-accessible \
-  --vpc-security-group-ids $RDS_SECG \
-  --query "DBInstance.DBInstanceIdentifier" \
-  --output text)
-
-echo $RDS_ID
-export RDS_ID=telemo-mysql
-
-
-export RDS_ENDPOINT=$(aws rds describe-db-instances  \
-  --db-instance-identifier $RDS_ID  \
-  --query "DBInstances[0].Endpoint.Address"  \
-  --output text)
-  
-export RDS_PORT=$(aws rds describe-db-instances  \
-  --db-instance-identifier $RDS_ID  \
-  --query "DBInstances[0].Endpoint.Port"\
-  --output text)
-
-export RDS_JDBC=jdbc:mysql://$RDS_ENDPOINT:$RDS_PORT/$MYSQL_DB
-echo $RDS_JDBC
-
-```
-
 
 # AWS Elastic Beanstalk
 ```
+git clone https://github.com/CaravanaCloud/telemetry-demo.git
+cd telemetry-demo
+```
+
+```
+echo aws s3 mb s3://$EB_BUCKET
 aws s3 mb s3://$EB_BUCKET
+
 aws elasticbeanstalk create-application --application-name $EB_APP
+
 aws iam create-role --role-name $EB_ROLE --assume-role-policy-document file://eb-ip-trust.json
-aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowS3 --policy-document file://eb-ip-trust.json
+aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowS3 --policy-document file://eb-ip-policy.json
 aws iam create-instance-profile --instance-profile-name eb-instance-profile
 aws iam add-role-to-instance-profile --instance-profile-name eb-instance-profile --role-name $EB_ROLE
+```
 
-
+```
 mvn -f telemo-quarkus/pom.xml clean package -Peb
 aws s3 cp ./telemo-quarkus/target/telemo-eb.zip s3://$EB_BUCKET/$EB_VERSION_KEY
 
@@ -327,12 +475,14 @@ aws elasticbeanstalk create-environment \
 # AWS Lambda
 ```
 aws iam create-role --role-name $LAMBDA_ROLE --assume-role-policy-document file://lambda-role-trust.json
-aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowAPIs --policy-document file://lambda-role-trust.json
-
+aws iam put-role-policy --role-name $EB_ROLE --policy-name AllowAPIs --policy-document file://lambda-role-policy.json
 ```
 
 ```
-mvn -f telemo-quarkus/pom.xml clean package -Plambda -Dquarkus.package.type=native
+mvn -f telemo-quarkus/pom.xml clean package -Plambda
+```
+```
+cat target/sam.jvm.yaml
 ```
 
 ```
@@ -368,11 +518,16 @@ aws lambda update-function-configuration \
 # AWS Lambda Native
 
 ```
+mvn -f telemo-quarkus/pom.xml clean package -Plambda -Dquarkus.package.type=native -Dquarkus.native.container-build=true
+```
+
+```
 sam deploy --guided -t target/sam.native.yaml 
 ```
 
 
 ```
+export SAM_NATIVE_STACK=telemo-app
 export LAMBDA_NATIVE=$(aws cloudformation describe-stack-resources \
     --stack-name $SAM_NATIVE_STACK \
     --logical-resource-id TelemoQuarkusNative \
@@ -398,7 +553,20 @@ aws lambda update-function-configuration \
 
 ```
 
+```
+export GATLING_BASE_URL=https://grtc02dhfd.execute-api.us-west-2.amazonaws.com/
+export GATLING_USERS_SEC=1
+export GATLING_TIMES=5
+export GATLING_LEVEL_MINUTES=5
+
+mvn -f telemo-gatling/pom.xml clean compile gatling:test
+```
+
+
 # Holy Grail?
+
+Reactive? Containers?
+Kubernetes? On-Premises?
 
 ¯\_(ツ)_/¯
 
@@ -407,7 +575,7 @@ aws lambda update-function-configuration \
 5- Test your compute costs to define "normal".
 4- Undertand your percentiles and detect "anomalies".
 3- Beware of Database Pooling and HTTP Caching / Throttling.
-2- Make it as fast as needed, but not faster.
+2- Make it as fast as viable, but not faster.
 1- Try the [Telemetry Demo](https://github.com/CaravanaCloud/telemetry-demo)!
 
 ## Gatling Results
@@ -417,5 +585,7 @@ aws lambda update-function-configuration \
 [Elastic Beanstalk](https://s3-us-west-2.amazonaws.com/faermanj.me/telemosimulation_eb_20210605185313815/index.html)
 
 
-Thank you!
+Thank you! <3
 
+Julio @faermanj
+faermanj.me/ama
