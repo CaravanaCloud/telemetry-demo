@@ -4,16 +4,24 @@ Economize na conta de cloud e entendenda o desempenho de sua aplicaçao.
 
 Repository: https://github.com/CaravanaCloud/telemetry-demo
 
-Ask me anything: https://faermanj.me/ama
-
-Os comandos abaixos foram testados no Amazon Linux, mas funcionam igualmente em outras distribuiçoes.
 
 # [AWS Cloud Shell](https://aws.amazon.com/cloudshell/)
 
-https://us-west-2.console.aws.amazon.com/cloudshell/home?region=us-west-2
+https://console.aws.amazon.com/cloudshell/home
+
+Inicie uma nova sessão do [tmux](https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/)
+```
+tmux new -s telemo
+```
+
+Se por qualquer motivo precisar recarregar a página, recarregue a sessão do tmux
+```
+tmux attach -t telemo
+```
+# Identificador Unico
 
 ```
-export UNIQ="jufaerma$(date +'%Y%m%d')"
+export UNIQ="telemo$(date +'%m%d%s')"
 
 echo $UNIQ
 ```
@@ -32,7 +40,7 @@ aws ec2 create-tags --resources $VPC_ID \
     
 export VPC_ID2=$(aws ec2 describe-vpcs \
     --filter --filters Name=tag:Name,Values="vpc-$UNIQ" \
-    --query "Vpcs[0].VpcId"
+    --query "Vpcs[0].VpcId" \
     --output text)
 
 echo export VPC_ID=$VPC_ID2   
@@ -76,12 +84,18 @@ aws ec2 create-route \
 
 Setup the public Subnets
 
-Availability Zone A
+Availability Zone 1
+
 ```
+export AZ1=$(aws ec2 describe-availability-zones \
+    --query "AvailabilityZones[0].ZoneName" \
+    --output text)
+echo $AZ1
+
 export NET_A=$(aws ec2 create-subnet \
     --vpc-id $VPC_ID \
     --cidr-block 10.0.200.0/24 \
-    --availability-zone us-west-2a \
+    --availability-zone "$AZ1" \
     --query "Subnet.SubnetId" \
     --output text)
     
@@ -95,12 +109,19 @@ aws ec2 modify-subnet-attribute  \
     --subnet-id $NET_A  \
     --map-public-ip-on-launch
 ```
-Availability Zone B
+
+Availability Zone 2
 ```
+export AZ2=$(aws ec2 describe-availability-zones \
+    --query "AvailabilityZones[1].ZoneName" \
+    --output text)
+
+echo $AZ2
+
 export NET_B=$(aws ec2 create-subnet \
     --vpc-id $VPC_ID \
     --cidr-block 10.0.201.0/24 \
-    --availability-zone us-west-2b \
+    --availability-zone "$AZ2" \
     --query "Subnet.SubnetId" \
     --output text)
     
@@ -113,6 +134,7 @@ aws ec2 associate-route-table \
 aws ec2 modify-subnet-attribute  \
     --subnet-id $NET_B  \
     --map-public-ip-on-launch
+
 ```
 
 

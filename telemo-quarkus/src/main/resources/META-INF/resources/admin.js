@@ -17,7 +17,9 @@ function markEach(hb){
   var marker = L.marker([hb.lat, hb.lng]);
   var text = "<p>";
   text += hb["sourceUUID"] + "<br/>";
-  text += "<span style='color: "+hb["displayColor"]+"'>"+hb["batteryLevel"] + " %<span/>";
+  text += "<div style='color: "+hb["displayColor"]+"'> 🔋 "+hb["batteryLevel"] + " %</div>";
+  text += "<div><textarea style='width: 100%;'></textarea></div>";
+  text += "<div><input type='button' value='email'></input></div>";
   text += "</p>";
   marker.bindPopup(text);
   markers.addLayer(marker);
