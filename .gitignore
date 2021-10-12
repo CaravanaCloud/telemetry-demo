@@ -1,3 +1,7 @@
+# Local env
+.envrc
+envrc
+
 # Compiled class file
 *.class
 
@@ -29,7 +33,6 @@ hs_err_pid*
 target/
 *.pem
 
-.envrc
 
 lambdahttp
 .terraform
