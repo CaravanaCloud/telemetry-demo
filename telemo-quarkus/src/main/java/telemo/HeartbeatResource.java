@@ -101,7 +101,6 @@ public class HeartbeatResource {
         Heartbeat merge = heartbeatSvc.merge(hb);
         log.fine(merge.toString());
         return merge;
-
     }
 
     private List<Heartbeat> findAll() {

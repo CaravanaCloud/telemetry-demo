@@ -16,6 +16,7 @@
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.version>2.3.0.Final</quarkus.platform.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+    <aws.java.sdk.version>2.16.1</aws.java.sdk.version>
     <skipTests>true</skipTests>
   </properties>
   <dependencyManagement>
@@ -24,6 +25,13 @@
         <groupId>${quarkus.platform.group-id}</groupId>
         <artifactId>${quarkus.platform.artifact-id}</artifactId>
         <version>${quarkus.platform.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${aws.java.sdk.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -75,10 +83,19 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-flyway</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-health</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>ses</artifactId>
     </dependency>
   </dependencies>
   <build>
+    <defaultGoal>clean quarkus:dev</defaultGoal>
     <plugins>
           <plugin>
         <groupId>${quarkus.platform.group-id}</groupId>
